@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "bb78030a5f9fcac6f1d678b7692800d8"
-application_url = "https://makes-inquiries-leaf-lance.trycloudflare.com"
+application_url = "https://takes-lung-cooking-pill.trycloudflare.com"
 embedded = true
 name = "alert-notifier"
 handle = "alert-notifier"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://makes-inquiries-leaf-lance.trycloudflare.com/auth/callback",
-  "https://makes-inquiries-leaf-lance.trycloudflare.com/auth/shopify/callback",
-  "https://makes-inquiries-leaf-lance.trycloudflare.com/api/auth/callback"
+  "https://takes-lung-cooking-pill.trycloudflare.com/auth/callback",
+  "https://takes-lung-cooking-pill.trycloudflare.com/auth/shopify/callback",
+  "https://takes-lung-cooking-pill.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
