@@ -54,6 +54,10 @@ enum AlertType {
   PRODUCT_CREATED
   PRODUCT_UPDATED
   PRODUCT_DELETED
+  SIGN_IN
+  SIGN_UP
+  CHECK_OUT
+  SYSTEM_ISSUE
 }
 
 enum AlertStatus {
