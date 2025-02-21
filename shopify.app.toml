@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "bb78030a5f9fcac6f1d678b7692800d8"
-application_url = "https://grammar-shares-prospects-ps.trycloudflare.com"
+application_url = "https://scoop-manufacturers-mods-cingular.trycloudflare.com"
 embedded = true
 name = "alert-notifier"
 handle = "alert-notifier"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://grammar-shares-prospects-ps.trycloudflare.com/auth/callback",
-  "https://grammar-shares-prospects-ps.trycloudflare.com/auth/shopify/callback",
-  "https://grammar-shares-prospects-ps.trycloudflare.com/api/auth/callback"
+  "https://scoop-manufacturers-mods-cingular.trycloudflare.com/auth/callback",
+  "https://scoop-manufacturers-mods-cingular.trycloudflare.com/auth/shopify/callback",
+  "https://scoop-manufacturers-mods-cingular.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
