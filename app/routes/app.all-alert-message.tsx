@@ -7,6 +7,7 @@ import { useLoaderData } from "@remix-run/react";
 import { Layout, Page } from "@shopify/polaris";
 import { AlertMessagesList } from "app/components/AllAlertMessage/AlertMessageList";
 import { AlertMessagesService } from "app/services/all-alert-message.server";
+import { authenticate } from "app/shopify.server";
 import type { AlertMessage, AlertStatus, AlertType } from "app/types/allAlerts";
 import { useState, useCallback } from "react";
 
@@ -18,6 +19,7 @@ import { useState, useCallback } from "react";
 // }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log(await authenticate.admin(request));
   const shopId = "12345678"; // Should come from auth context
   const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
 
