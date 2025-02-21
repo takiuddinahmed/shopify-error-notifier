@@ -14,66 +14,71 @@ import {
 interface Platform {
   id: string;
   label: string;
-  fields: string[];
+  fields: Array<{
+    label: string;
+    schemaKey: keyof ReceiverConfig;
+    helpText?: string;
+    placeholder?: string;
+  }>;
 }
 
+type ReceiverConfig = {
+  telegramBotToken?: string;
+  telegramReceiverChatIds?: string;
+};
+
 export default function AlertMessageReceiver() {
-  // Platforms available for receiving alerts
   const platforms: Platform[] = [
     {
       id: "telegram",
       label: "Telegram",
-      fields: ["Telegram ID", "Secret Key"],
-    },
-    {
-      id: "email",
-      label: "Email",
-      fields: ["Email Address"],
-    },
-    {
-      id: "slack",
-      label: "Slack",
-      fields: ["Webhook URL"],
+      fields: [
+        {
+          label: "Bot Token",
+          schemaKey: "telegramBotToken",
+          helpText: "Your Telegram bot token provided by BotFather",
+        },
+        {
+          label: "Chat IDs",
+          schemaKey: "telegramReceiverChatIds",
+          placeholder: "Enter comma-separated chat IDs (e.g., 12345, 67890)",
+          helpText: "Separate multiple chat IDs with commas",
+        },
+      ],
     },
   ];
 
-  // State to manage selected platforms
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [config, setConfig] = useState<ReceiverConfig>({});
 
-  // State to manage credential fields for each platform
-  const [credentials, setCredentials] = useState<{ [key: string]: string }>({});
-
-  // Handle platform selection change
   const handlePlatformChange = useCallback((selected: string[]) => {
     setSelectedPlatforms(selected);
-    // Reset credentials when platforms change
-    setCredentials({});
+    // Reset config when platforms change
+    setConfig({});
   }, []);
 
-  // Handle credential field changes
-  const handleCredentialChange = useCallback(
-    (platformId: string, field: string, value: string) => {
-      setCredentials((prev) => ({
-        ...prev,
-        [`${platformId}_${field}`]: value,
-      }));
+  const handleConfigChange = useCallback(
+    (field: keyof ReceiverConfig, value: string) => {
+      setConfig((prev) => ({ ...prev, [field]: value }));
     },
     [],
   );
 
-  // Handle form submission
   const handleSubmit = useCallback(() => {
-    console.log("Selected Platforms:", selectedPlatforms);
-    console.log("Credentials:", credentials);
-    // Add logic to save the configuration
-  }, [selectedPlatforms, credentials]);
+    const submission = {
+      isTelegramEnabled: selectedPlatforms.includes("telegram"),
+      ...config,
+    };
+    console.log("Configuration to save:", submission);
+    // Add your save logic here
+  }, [selectedPlatforms, config]);
 
   return (
     <Page title="Alert Message Receiver">
       <Layout>
         <Layout.Section>
           <BlockStack gap="500">
-            {/* Card 1: Platform Selection */}
+            {/* Platform Selection Card */}
             <Card>
               <BlockStack gap="200">
                 <Text as="h2" variant="headingMd">
@@ -98,7 +103,7 @@ export default function AlertMessageReceiver() {
               </FormLayout>
             </Card>
 
-            {/* Card 2: Credential Fields */}
+            {/* Credentials Card */}
             {selectedPlatforms.length > 0 && (
               <Card>
                 <BlockStack gap="200">
@@ -121,19 +126,15 @@ export default function AlertMessageReceiver() {
                           </Text>
                           {platform.fields.map((field) => (
                             <TextField
-                              key={`${platform.id}_${field}`}
-                              label={field}
-                              value={
-                                credentials[`${platform.id}_${field}`] || ""
-                              }
+                              key={`${platform.id}_${field.schemaKey}`}
+                              label={field.label}
+                              value={config[field.schemaKey] || ""}
                               onChange={(value) =>
-                                handleCredentialChange(
-                                  platform.id,
-                                  field,
-                                  value,
-                                )
+                                handleConfigChange(field.schemaKey, value)
                               }
                               autoComplete="off"
+                              placeholder={field.placeholder}
+                              helpText={field.helpText}
                             />
                           ))}
                         </BlockStack>
@@ -144,7 +145,7 @@ export default function AlertMessageReceiver() {
               </Card>
             )}
 
-            {/* Card 3: Save Settings */}
+            {/* Save Settings Card */}
             <Card>
               <Button onClick={handleSubmit}>Save Settings</Button>
             </Card>
