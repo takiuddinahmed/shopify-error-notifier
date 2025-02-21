@@ -1,5 +1,5 @@
-import type { AlertType } from "app/components/AllAlertMessage/AlertMessageList";
 import prisma from "app/db.server";
+import { AlertType } from "app/types/allAlerts";
 
 interface CreateAlertData {
   shopId: string;

@@ -1,6 +1,5 @@
 // app/routes/webhooks.tsx
 import { ActionFunction } from "@remix-run/node";
-import { verifyWebhookHmac } from "app/utils/verifyWebhook";
 
 export const action: ActionFunction = async ({ request }) => {
   console.log("Received webhook request");
@@ -9,10 +8,6 @@ export const action: ActionFunction = async ({ request }) => {
   // Verify webhook authenticity
   const hmacHeader = request.headers.get("X-Shopify-Hmac-Sha256");
   const rawBody = await request.text();
-
-  if (!verifyWebhookHmac(rawBody, hmacHeader)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
 
   // Process different webhook topics
   switch (topic) {

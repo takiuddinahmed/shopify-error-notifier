@@ -5,19 +5,35 @@ import {
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Layout, Page } from "@shopify/polaris";
-import {
-  AlertMessagesList,
-  AlertType,
-} from "app/components/AllAlertMessage/AlertMessageList";
+import { AlertMessagesList } from "app/components/AllAlertMessage/AlertMessageList";
 import { AlertMessagesService } from "app/services/all-alert-message.server";
+import type { AlertMessage, AlertStatus, AlertType } from "app/types/allAlerts";
 import { useState, useCallback } from "react";
+
+// export async function loader({ request }: LoaderFunctionArgs) {
+//   const shopId = "12345678";
+//   const alertMessages: AlertMessage[] =
+//     await AlertMessagesService.getAlertMessages(shopId);
+//   return json({ alertMessages });
+// }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const shopId = "12345678"; // Should come from auth context
-  const alertMessages = await AlertMessagesService.getAlertMessages(shopId);
+  const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
+
+  // Convert Prisma types to your interface types
+  const alertMessages: AlertMessage[] = dbAlertMessages.map((alert) => ({
+    id: alert.id,
+    shopId: alert.shopId,
+    message: alert.message,
+    createdAt: alert.createdAt.toISOString(),
+    alertType: alert.alertType as AlertType,
+    status: alert.status as AlertStatus,
+    errorMessage: alert.errorMessage || undefined, // Convert null to undefined
+  }));
+
   return json({ alertMessages });
 }
-
 export async function action({ request }: ActionFunctionArgs) {
   const shopId = "12345678"; // Should come from auth context
   const data = Object.fromEntries(await request.formData());
