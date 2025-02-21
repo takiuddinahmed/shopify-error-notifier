@@ -1,24 +1,13 @@
-export enum AlertType {
-  PRODUCT_CREATED = "PRODUCT_CREATED",
-  PRODUCT_UPDATED = "PRODUCT_UPDATED",
-  PRODUCT_DELETED = "PRODUCT_DELETED",
-  SIGN_IN = "SIGN_IN",
-  SIGN_UP = "SIGN_UP",
-  CHECK_OUT = "CHECK_OUT",
-  SYSTEM_ISSUE = "SYSTEM_ISSUE",
-}
+import { AlertType, AlertStatus } from "@prisma/client";
 
-export enum AlertStatus {
-  Success = "Success",
-  Error = "Error",
-}
+export { AlertType, AlertStatus };
 
 export interface AlertMessage {
   id: string;
+  shopId: string;
   alertType: AlertType;
   message: string;
   createdAt: string;
   status: AlertStatus;
-  shopId: string;
   errorMessage?: string;
 }

@@ -8,46 +8,33 @@ import { Layout, Page } from "@shopify/polaris";
 import { AlertMessagesList } from "app/components/AllAlertMessage/AlertMessageList";
 import { AlertMessagesService } from "app/services/all-alert-message.server";
 import { authenticate } from "app/shopify.server";
-import type { AlertMessage, AlertStatus, AlertType } from "app/types/allAlerts";
+import type { AlertType, type AlertMessage } from "@prisma/client";
 import { useState, useCallback } from "react";
-
-// export async function loader({ request }: LoaderFunctionArgs) {
-//   const shopId = "12345678";
-//   const alertMessages: AlertMessage[] =
-//     await AlertMessagesService.getAlertMessages(shopId);
-//   return json({ alertMessages });
-// }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log(await authenticate.admin(request));
   const shopId = "12345678"; // Should come from auth context
   const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
 
-  // Convert Prisma types to your interface types
+  // Ensure createdAt is a Date object
   const alertMessages: AlertMessage[] = dbAlertMessages.map((alert) => ({
-    id: alert.id,
-    shopId: alert.shopId,
-    message: alert.message,
-    createdAt: alert.createdAt.toISOString(),
-    alertType: alert.alertType as AlertType,
-    status: alert.status as AlertStatus,
-    errorMessage: alert.errorMessage || undefined, // Convert null to undefined
+    ...alert,
+    createdAt: new Date(alert.createdAt), // Ensure createdAt is a Date
   }));
 
   return json({ alertMessages });
 }
+
 export async function action({ request }: ActionFunctionArgs) {
   const shopId = "12345678"; // Should come from auth context
   const data = Object.fromEntries(await request.formData());
 
-  // Handle resend action
   if (request.url.includes("/resend")) {
     const id = data.id as string;
     await AlertMessagesService.resendAlert(id);
     return json({ success: true });
   }
 
-  // Handle create action
   const alertData = {
     shopId,
     alertType: data.alertType as AlertType,
@@ -61,6 +48,11 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function AllAlertMessages() {
   const { alertMessages } = useLoaderData<typeof loader>();
   const [modalActive, setModalActive] = useState(false);
+
+  const parsedAlertMessages = alertMessages.map((alert) => ({
+    ...alert,
+    createdAt: new Date(alert.createdAt),
+  }));
 
   const handleModalChange = useCallback((active: boolean) => {
     setModalActive(active);
@@ -77,7 +69,7 @@ export default function AllAlertMessages() {
       <Layout>
         <Layout.Section>
           <AlertMessagesList
-            alertMessages={alertMessages}
+            alertMessages={parsedAlertMessages}
             modalActive={modalActive}
             onModalChange={handleModalChange}
           />

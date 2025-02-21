@@ -1,11 +1,5 @@
 import prisma from "app/db.server";
-import { AlertType } from "app/types/allAlerts";
-
-interface CreateAlertData {
-  shopId: string;
-  alertType: AlertType;
-  message: string;
-}
+import { AlertType, AlertStatus } from "@prisma/client";
 
 export class AlertMessagesService {
   static async getAlertMessages(shopId: string) {
@@ -15,33 +9,25 @@ export class AlertMessagesService {
     });
   }
 
-  static async createAlert(data: CreateAlertData) {
+  static async createAlert(data: {
+    shopId: string;
+    alertType: AlertType;
+    message: string;
+  }) {
     return prisma.alertMessage.create({
       data: {
-        ...data,
-        status: "Success",
+        shopId: data.shopId,
+        alertType: data.alertType,
+        message: data.message,
+        status: AlertStatus.Success, // Defaulting to Success
       },
     });
   }
 
   static async resendAlert(id: string) {
-    const alert = await prisma.alertMessage.findUnique({
+    return prisma.alertMessage.update({
       where: { id },
-    });
-
-    if (!alert) {
-      throw new Error("Alert not found");
-    }
-
-    // Here you would implement the actual resend logic
-    // For now, we'll just create a new alert with the same data
-    return prisma.alertMessage.create({
-      data: {
-        shopId: alert.shopId,
-        alertType: alert.alertType,
-        message: alert.message,
-        status: "Success",
-      },
+      data: { status: AlertStatus.Success }, // Assume resend updates status
     });
   }
 }

@@ -1,3 +1,4 @@
+import { AlertMessage } from "@prisma/client";
 import prisma from "app/db.server";
 import type { AlertType } from "app/types/allAlerts";
 
@@ -10,16 +11,6 @@ interface AlertConfiguration {
   signin: boolean;
   checkout: boolean;
   systemIssue: boolean;
-}
-
-interface AlertMessage {
-  id: string;
-  shopId: string;
-  alertType: AlertType;
-  message: string;
-  status: "Success" | "Error";
-  errorMessage?: string;
-  createdAt: Date;
 }
 
 interface PublishAlertParams {
@@ -65,7 +56,7 @@ export class BaseAlertService {
       SYSTEM_ISSUE: "systemIssue",
     };
 
-    return alertConfig[configMap[alertType]] ?? false;
+    return (alertConfig[configMap[alertType]] as boolean) ?? false;
   }
 
   // Publish an alert based on configurations
