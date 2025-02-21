@@ -13,7 +13,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
   const shopId = session.shop;
   const configuration = await ReceiverService.getConfiguration(shopId);
-  return json({ configuration });
+
+  return json({
+    configuration: configuration
+      ? {
+          isTelegramEnabled: configuration.isTelegramEnabled,
+          telegramBotToken: configuration.telegramBotToken ?? undefined,
+          telegramReceiverChatIds:
+            configuration.telegramReceiverChatIds ?? undefined,
+        }
+      : null,
+  });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
