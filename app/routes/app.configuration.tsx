@@ -7,15 +7,18 @@ import { useLoaderData } from "@remix-run/react";
 import { Layout, Page } from "@shopify/polaris";
 import { AlertConfigForm } from "app/components/configuration/AlertConfigForm";
 import { ConfigurationService } from "app/services/configuration.server";
+import { authenticate } from "app/shopify.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const configuration = await ConfigurationService.getConfiguration(shopId);
   return json({ configuration });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const data = Object.fromEntries(await request.formData());
 
   const configurationData = {

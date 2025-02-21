@@ -7,15 +7,18 @@ import { useLoaderData } from "@remix-run/react";
 import { Layout, Page } from "@shopify/polaris";
 import { AlertMessageReceiver } from "app/components/AlertReceiverConfiguration/AlertMessageReceiver";
 import { ReceiverService } from "app/services/alert-receiver-configuration.server";
+import { authenticate } from "app/shopify.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const configuration = await ReceiverService.getConfiguration(shopId);
   return json({ configuration });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const data = Object.fromEntries(await request.formData());
 
   const selectedPlatforms = JSON.parse(data.selectedPlatforms as string);
@@ -25,6 +28,8 @@ export async function action({ request }: ActionFunctionArgs) {
     isTelegramEnabled: selectedPlatforms.includes("telegram"),
     telegramBotToken: data.telegramBotToken as string,
     telegramReceiverChatIds: data.telegramReceiverChatIds as string,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   await ReceiverService.upsertConfiguration(configurationData);

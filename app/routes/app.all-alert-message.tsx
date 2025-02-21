@@ -8,11 +8,10 @@ import { Layout, Page } from "@shopify/polaris";
 import { AlertMessagesList } from "app/components/AllAlertMessage/AlertMessageList";
 import { AlertMessagesService } from "app/services/all-alert-message.server";
 import { authenticate } from "app/shopify.server";
-import type { AlertType, type AlertMessage } from "@prisma/client";
+import type { AlertType, AlertMessage } from "@prisma/client";
 import { useState, useCallback } from "react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  console.log(await authenticate.admin(request));
   const shopId = "12345678"; // Should come from auth context
   const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
 
