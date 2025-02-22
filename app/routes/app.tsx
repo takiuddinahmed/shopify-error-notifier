@@ -25,8 +25,11 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/configuration">Configuration</Link>
-        <Link to="/app/alertMessageReceiver">Alert Message Receiver</Link>
-        <Link to="/app/allAlertMessage">All Alert Messages</Link>
+        <Link to="/app/alert-receiver-configuration">
+          Alert Message Receiver
+        </Link>
+        <Link to="/app/all-alert-message">All Alert Messages</Link>
+        <Link to="/app/test">Test</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
