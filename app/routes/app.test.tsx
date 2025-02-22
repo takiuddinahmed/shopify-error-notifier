@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Page, Button, Card, Banner } from "@shopify/polaris";
+import { Page, Button, Card, Banner, BlockStack } from "@shopify/polaris";
 import { json, LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { authenticate } from "app/shopify.server";
 import { AlertConfigurationService } from "app/services/base.server";
-import { TelegramPublisherService } from "app/services/publisher.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
@@ -21,11 +20,9 @@ export async function action({ request }: ActionFunctionArgs) {
     const alertType = "SYSTEM_ISSUE";
     const message = "This is a system test alert message";
 
-    const alertResponse = await AlertConfigurationService.handleSendAlert(
-      shopId,
-      alertType,
-      message,
-    );
+    const alertService = new AlertConfigurationService();
+
+    await alertService.handleSendAlert(shopId, alertType, message);
     return json({ success: true, message: "Alert published successfully" });
   } catch (error) {
     return json({
@@ -38,10 +35,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function AlertPage() {
   const fetcher = useFetcher();
-  const [status, setStatus] = useState<{
+
+  const status = fetcher.data as {
     success: boolean;
     message: string;
-  } | null>(null);
+  };
+
+  console.log("status:", fetcher.data);
 
   const handlePublishAlert = () => {
     console.log("Publishing alert..."); // Debug log
@@ -52,7 +52,8 @@ export default function AlertPage() {
 
   return (
     <Page title="Publish Alert">
-      <Card>
+      <BlockStack gap="500">
+        {status && <Card>{status.message}</Card>}
         <Card>
           <Button
             onClick={handlePublishAlert}
@@ -61,7 +62,7 @@ export default function AlertPage() {
             Publish Alert
           </Button>
         </Card>
-      </Card>
+      </BlockStack>
     </Page>
   );
 }

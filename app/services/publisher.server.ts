@@ -9,7 +9,7 @@ interface TelegramCredentials {
 }
 
 export class TelegramPublisherService {
-  static async publishToTelegram(
+  async publishToTelegram(
     message: TelegramMessage,
     credentials: TelegramCredentials,
   ): Promise<void> {
@@ -37,8 +37,7 @@ export class TelegramPublisherService {
     }
   }
 
-  // Send to specific Telegram chat
-  private static async sendToTelegramChat(
+  private async sendToTelegramChat(
     message: string,
     chatId: string,
     botToken: string,
@@ -66,8 +65,7 @@ export class TelegramPublisherService {
     }
   }
 
-  // Format message for Telegram
-  private static formatTelegramMessage(
+  private formatTelegramMessage(
     message: string,
     metadata: Record<string, any>,
   ): string {

@@ -15,12 +15,23 @@ interface AlertConfiguration {
 }
 
 export class AlertConfigurationService {
-  static async getShopConfiguration(shopId: string) {
+  private prismaClient;
+  private publisher;
+
+  constructor(
+    prismaClient = prisma,
+    telegramPublisher = new TelegramPublisherService(),
+  ) {
+    this.prismaClient = prismaClient;
+    this.publisher = telegramPublisher;
+  }
+
+  async getShopConfiguration(shopId: string) {
     const [alertConfig, receiverConfig] = await Promise.all([
-      prisma.configuration.findUnique({
+      this.prismaClient.configuration.findUnique({
         where: { shopId },
       }),
-      prisma.receiverConfiguration.findUnique({
+      this.prismaClient.receiverConfiguration.findUnique({
         where: { shopId },
       }),
     ]);
@@ -31,11 +42,7 @@ export class AlertConfigurationService {
     };
   }
 
-  // Check if an alert type is enabled for a shop
-  static async isAlertEnabled(
-    shopId: string,
-    alertType: AlertType,
-  ): Promise<boolean> {
+  async isAlertEnabled(shopId: string, alertType: AlertType): Promise<boolean> {
     const { alertConfig } = await this.getShopConfiguration(shopId);
     if (!alertConfig) return false;
 
@@ -52,22 +59,19 @@ export class AlertConfigurationService {
     return (alertConfig[configMap[alertType]] as boolean) ?? false;
   }
 
-  // Get receiver configuration for a shop
-  static async getReceiverConfiguration(
+  async getReceiverConfiguration(
     shopId: string,
   ): Promise<ReceiverConfiguration | null> {
     const { receiverConfig } = await this.getShopConfiguration(shopId);
     return receiverConfig;
   }
 
-  // Helper method to check if receiver platform is enabled for a shop
-  static async receiverPlatform(shopId: string): Promise<boolean> {
+  async receiverPlatform(shopId: string): Promise<boolean> {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
     return !!receiverConfig?.receiverPlatform;
   }
 
-  // Get Telegram configuration if enabled
-  static async getTelegramConfig(shopId: string) {
+  async getTelegramConfig(shopId: string) {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
 
     if (
@@ -84,8 +88,7 @@ export class AlertConfigurationService {
     };
   }
 
-  // Main method to handle alert workflow
-  static async handleSendAlert(
+  async handleSendAlert(
     shopId: string,
     alertType: AlertType,
     message?: string,
@@ -117,7 +120,7 @@ export class AlertConfigurationService {
         if (telegramConfig) {
           await Promise.all(
             telegramConfig.chatIds.map((chatId) =>
-              TelegramPublisherService.publishToTelegram(
+              this.publisher.publishToTelegram(
                 generatedMessage,
                 telegramConfig,
               ),
