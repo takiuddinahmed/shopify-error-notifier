@@ -12,7 +12,9 @@ import { authenticate } from "app/shopify.server";
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
   const shopId = session.shop;
-  const configuration = await ReceiverService.getConfiguration(shopId);
+
+  const receiverService = new ReceiverService(shopId);
+  const configuration = await receiverService.getConfiguration();
 
   return json({
     configuration: configuration
@@ -42,7 +44,9 @@ export async function action({ request }: ActionFunctionArgs) {
     updatedAt: new Date().toISOString(),
   };
 
-  await ReceiverService.upsertConfiguration(configurationData);
+  const receiverService = new ReceiverService(shopId);
+
+  await receiverService.upsertConfiguration(configurationData);
   return json({ success: true });
 }
 
