@@ -1,6 +1,7 @@
 import type { AlertType } from "app/types/allAlerts";
 import prisma from "app/db.server";
 import type { ReceiverConfiguration } from "@prisma/client";
+import { TelegramPublisherService } from "./publisher.server";
 
 interface AlertConfiguration {
   shopId: string;
@@ -12,12 +13,6 @@ interface AlertConfiguration {
   checkout: boolean;
   systemIssue: boolean;
 }
-
-// interface ReceiverConfiguration {
-//   receiverPlatform: boolean;
-//   telegramBotToken?: string;
-//   telegramReceiverChatIds?: string;
-// }
 
 export class AlertConfigurationService {
   static async getShopConfiguration(shopId: string) {
@@ -65,7 +60,7 @@ export class AlertConfigurationService {
     return receiverConfig;
   }
 
-  // Helper method to check if Telegram is enabled for a shop
+  // Helper method to check if receiver platform is enabled for a shop
   static async receiverPlatform(shopId: string): Promise<boolean> {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
     return !!receiverConfig?.receiverPlatform;
@@ -75,7 +70,11 @@ export class AlertConfigurationService {
   static async getTelegramConfig(shopId: string) {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
 
-    if (!receiverConfig?.receiverPlatform) {
+    if (
+      !receiverConfig?.receiverPlatform ||
+      !receiverConfig?.telegramBotToken ||
+      !receiverConfig?.telegramReceiverChatIds
+    ) {
       return null;
     }
 
@@ -83,5 +82,54 @@ export class AlertConfigurationService {
       botToken: receiverConfig.telegramBotToken,
       chatIds: receiverConfig.telegramReceiverChatIds?.split(",") || [],
     };
+  }
+
+  // Main method to handle alert workflow
+  static async handleSendAlert(
+    shopId: string,
+    alertType: AlertType,
+    message?: string,
+  ): Promise<void> {
+    try {
+      // Step 1: Check if alert is enabled for this shop and alert type
+      const isEnabled = await this.isAlertEnabled(shopId, alertType);
+      if (!isEnabled) {
+        console.log(`Alert type ${alertType} is disabled for shop ${shopId}`);
+        return;
+      }
+
+      // Step 2: Get receiver configuration and check if platform is enabled
+      const receiverConfig = await this.getReceiverConfiguration(shopId);
+      if (!receiverConfig?.receiverPlatform) {
+        console.log(`No receiver platform enabled for shop ${shopId}`);
+        return;
+      }
+
+      // Step 3: Route to appropriate publisher service based on platform
+      if (receiverConfig.receiverPlatform === "telegram") {
+        const telegramConfig = await this.getTelegramConfig(shopId);
+
+        const generatedMessage = {
+          message: message || "An alert has been triggered",
+          metadata: {},
+        };
+
+        if (telegramConfig) {
+          await Promise.all(
+            telegramConfig.chatIds.map((chatId) =>
+              TelegramPublisherService.publishToTelegram(
+                generatedMessage,
+                telegramConfig,
+              ),
+            ),
+          );
+        }
+      } else {
+        throw new Error("Unsupported receiver platform");
+      }
+    } catch (error) {
+      console.error("Error handling alert:", error);
+      throw error;
+    }
   }
 }

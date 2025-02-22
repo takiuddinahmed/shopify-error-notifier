@@ -19,22 +19,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const alertType = "SYSTEM_ISSUE";
-    const message = "This is a test alert message";
+    const message = "This is a system test alert message";
 
-    const telegramConfig =
-      await AlertConfigurationService.getTelegramConfig(shopId);
-
-    if (telegramConfig?.botToken && telegramConfig.chatIds.length > 0) {
-      await TelegramPublisherService.publishToTelegram(
-        { message },
-        {
-          botToken: telegramConfig.botToken,
-          chatIds: telegramConfig.chatIds,
-        },
-      );
-      return json({ success: true, message: "Alert published successfully!" });
-    }
-    return json({ success: false, message: "Telegram not configured" });
+    const alertResponse = await AlertConfigurationService.handleSendAlert(
+      shopId,
+      alertType,
+      message,
+    );
+    return json({ success: true, message: "Alert published successfully" });
   } catch (error) {
     return json({
       success: false,

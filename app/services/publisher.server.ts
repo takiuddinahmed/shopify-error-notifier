@@ -3,16 +3,15 @@ interface TelegramMessage {
   metadata?: Record<string, any>;
 }
 
-interface TelegramConfig {
+interface TelegramCredentials {
   botToken: string;
   chatIds: string[];
 }
 
 export class TelegramPublisherService {
-  // Send message to Telegram
   static async publishToTelegram(
     message: TelegramMessage,
-    config: TelegramConfig,
+    credentials: TelegramCredentials,
   ): Promise<void> {
     const formattedMessage = this.formatTelegramMessage(
       message.message,
@@ -21,8 +20,12 @@ export class TelegramPublisherService {
 
     try {
       await Promise.all(
-        config.chatIds.map((chatId) =>
-          this.sendToTelegramChat(formattedMessage, chatId, config.botToken),
+        credentials.chatIds.map((chatId) =>
+          this.sendToTelegramChat(
+            formattedMessage,
+            chatId,
+            credentials.botToken,
+          ),
         ),
       );
     } catch (error) {
