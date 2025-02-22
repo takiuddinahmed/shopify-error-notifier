@@ -19,7 +19,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json({
     configuration: configuration
       ? {
-          isTelegramEnabled: configuration.isTelegramEnabled,
+          receiverPlatform: configuration.receiverPlatform
+            ? configuration.receiverPlatform.split(",")
+            : [],
           telegramBotToken: configuration.telegramBotToken ?? undefined,
           telegramReceiverChatIds:
             configuration.telegramReceiverChatIds ?? undefined,
@@ -33,11 +35,13 @@ export async function action({ request }: ActionFunctionArgs) {
   const shopId = session.shop;
   const data = Object.fromEntries(await request.formData());
 
-  const selectedPlatforms = JSON.parse(data.selectedPlatforms as string);
+  const selectedPlatforms: string[] = JSON.parse(
+    data.selectedPlatforms as string,
+  );
 
   const configurationData = {
     shopId,
-    isTelegramEnabled: selectedPlatforms.includes("telegram"),
+    receiverPlatform: selectedPlatforms.join(","),
     telegramBotToken: data.telegramBotToken as string,
     telegramReceiverChatIds: data.telegramReceiverChatIds as string,
     createdAt: new Date().toISOString(),
@@ -45,8 +49,8 @@ export async function action({ request }: ActionFunctionArgs) {
   };
 
   const receiverService = new ReceiverService(shopId);
-
   await receiverService.upsertConfiguration(configurationData);
+
   return json({ success: true });
 }
 

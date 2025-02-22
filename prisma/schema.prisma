@@ -43,7 +43,7 @@ model Configuration {
 model ReceiverConfiguration {
   id                 String  @id @default(cuid())
   shopId             String  @unique
-  isTelegramEnabled  Boolean @default(false)
+  receiverPlatform   String 
   telegramReceiverChatIds     String?
   telegramBotToken   String?
   createdAt          DateTime @default(now())

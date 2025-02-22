@@ -2,7 +2,7 @@ import prisma from "app/db.server";
 
 interface ReceiverConfigurationData {
   shopId: string;
-  isTelegramEnabled: boolean;
+  receiverPlatform: string;
   telegramBotToken?: string;
   telegramReceiverChatIds?: string;
 }

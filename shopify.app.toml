@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "bb78030a5f9fcac6f1d678b7692800d8"
-application_url = "https://female-explorer-ali-failing.trycloudflare.com"
+application_url = "https://pf-su-graphics-summary.trycloudflare.com"
 embedded = true
 name = "alert-notifier"
 handle = "alert-notifier"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://female-explorer-ali-failing.trycloudflare.com/auth/callback",
-  "https://female-explorer-ali-failing.trycloudflare.com/auth/shopify/callback",
-  "https://female-explorer-ali-failing.trycloudflare.com/api/auth/callback"
+  "https://pf-su-graphics-summary.trycloudflare.com/auth/callback",
+  "https://pf-su-graphics-summary.trycloudflare.com/auth/shopify/callback",
+  "https://pf-su-graphics-summary.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

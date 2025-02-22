@@ -30,7 +30,7 @@ ALTER TABLE "new_AlertMessage" RENAME TO "AlertMessage";
 CREATE TABLE "new_ReceiverConfiguration" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "shopId" TEXT NOT NULL,
-    "isTelegramEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "receiverPlatform" BOOLEAN NOT NULL DEFAULT false,
     "telegramReceiverChatIds" TEXT,
     "telegramBotToken" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

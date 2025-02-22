@@ -1,6 +1,6 @@
-import { AlertType } from "app/types/allAlerts";
+import type { AlertType } from "app/types/allAlerts";
 import prisma from "app/db.server";
-import { ReceiverConfiguration } from "@prisma/client";
+import type { ReceiverConfiguration } from "@prisma/client";
 
 interface AlertConfiguration {
   shopId: string;
@@ -14,13 +14,12 @@ interface AlertConfiguration {
 }
 
 // interface ReceiverConfiguration {
-//   isTelegramEnabled: boolean;
+//   receiverPlatform: boolean;
 //   telegramBotToken?: string;
 //   telegramReceiverChatIds?: string;
 // }
 
 export class AlertConfigurationService {
-  // Get combined configuration for a shop
   static async getShopConfiguration(shopId: string) {
     const [alertConfig, receiverConfig] = await Promise.all([
       prisma.configuration.findUnique({
@@ -67,16 +66,16 @@ export class AlertConfigurationService {
   }
 
   // Helper method to check if Telegram is enabled for a shop
-  static async isTelegramEnabled(shopId: string): Promise<boolean> {
+  static async receiverPlatform(shopId: string): Promise<boolean> {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
-    return !!receiverConfig?.isTelegramEnabled;
+    return !!receiverConfig?.receiverPlatform;
   }
 
   // Get Telegram configuration if enabled
   static async getTelegramConfig(shopId: string) {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
 
-    if (!receiverConfig?.isTelegramEnabled) {
+    if (!receiverConfig?.receiverPlatform) {
       return null;
     }
 
