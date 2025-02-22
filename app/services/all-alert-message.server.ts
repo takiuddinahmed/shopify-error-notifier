@@ -1,5 +1,6 @@
 import prisma from "app/db.server";
-import { AlertType, AlertStatus } from "@prisma/client";
+import type { AlertType } from "@prisma/client";
+import { AlertStatus } from "@prisma/client";
 
 export class AlertMessagesService {
   static async getAlertMessages(shopId: string) {
@@ -19,7 +20,7 @@ export class AlertMessagesService {
         shopId: data.shopId,
         alertType: data.alertType,
         message: data.message,
-        status: AlertStatus.Success, // Defaulting to Success
+        status: AlertStatus.Success,
       },
     });
   }
@@ -27,7 +28,7 @@ export class AlertMessagesService {
   static async resendAlert(id: string) {
     return prisma.alertMessage.update({
       where: { id },
-      data: { status: AlertStatus.Success }, // Assume resend updates status
+      data: { status: AlertStatus.Success },
     });
   }
 }

@@ -12,20 +12,22 @@ import type { AlertType, AlertMessage } from "@prisma/client";
 import { useState, useCallback } from "react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
 
   // Ensure createdAt is a Date object
   const alertMessages: AlertMessage[] = dbAlertMessages.map((alert) => ({
     ...alert,
-    createdAt: new Date(alert.createdAt), // Ensure createdAt is a Date
+    createdAt: new Date(alert.createdAt),
   }));
 
   return json({ alertMessages });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const data = Object.fromEntries(await request.formData());
 
   if (request.url.includes("/resend")) {
