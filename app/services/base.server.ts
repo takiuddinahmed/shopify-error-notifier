@@ -1,7 +1,8 @@
 import type { AlertType } from "app/types/allAlerts";
 import prisma from "app/db.server";
-import type { ReceiverConfiguration } from "@prisma/client";
+import { AlertStatus, type ReceiverConfiguration } from "@prisma/client";
 import { TelegramPublisherService } from "./publisher.server";
+import { AlertMessagesService } from "./all-alert-message.server";
 
 interface AlertConfiguration {
   shopId: string;
@@ -93,6 +94,9 @@ export class AlertConfigurationService {
     alertType: AlertType,
     message?: string,
   ): Promise<void> {
+    const alertMessagesService = new AlertMessagesService();
+    let createdAlert;
+
     try {
       // Step 1: Check if alert is enabled for this shop and alert type
       const isEnabled = await this.isAlertEnabled(shopId, alertType);
@@ -108,7 +112,14 @@ export class AlertConfigurationService {
         return;
       }
 
-      // Step 3: Route to appropriate publisher service based on platform
+      // Step 3: Create an alert message with "Pending" status
+      createdAlert = await alertMessagesService.createAlert({
+        shopId,
+        alertType,
+        message: message || "An alert has been triggered",
+      });
+
+      // Step 4: Route to appropriate publisher service based on platform
       if (receiverConfig.receiverPlatform === "telegram") {
         const telegramConfig = await this.getTelegramConfig(shopId);
 
@@ -118,19 +129,48 @@ export class AlertConfigurationService {
         };
 
         if (telegramConfig) {
-          await Promise.all(
-            telegramConfig.chatIds.map((chatId) =>
-              this.publisher.publishToTelegram(
-                generatedMessage,
-                telegramConfig,
+          try {
+            await Promise.all(
+              telegramConfig.chatIds.map((chatId) =>
+                this.publisher.publishToTelegram(
+                  generatedMessage,
+                  telegramConfig,
+                ),
               ),
-            ),
-          );
+            );
+
+            // Update alert status to SUCCESS if all messages were sent successfully
+            await alertMessagesService.updateAlertStatus(
+              createdAlert.id,
+              AlertStatus.Success,
+            );
+          } catch (publishError) {
+            // Update alert status to ERROR if any message failed to send
+            await alertMessagesService.updateAlertStatus(
+              createdAlert.id,
+              AlertStatus.Error,
+            );
+            throw publishError;
+          }
         }
       } else {
+        // Update status to ERROR for unsupported platform
+        if (createdAlert) {
+          await alertMessagesService.updateAlertStatus(
+            createdAlert.id,
+            AlertStatus.Error,
+          );
+        }
         throw new Error("Unsupported receiver platform");
       }
     } catch (error) {
+      // Ensure alert status is updated to ERROR if we have a created alert
+      if (createdAlert) {
+        await alertMessagesService.updateAlertStatus(
+          createdAlert.id,
+          AlertStatus.Error,
+        );
+      }
       console.error("Error handling alert:", error);
       throw error;
     }

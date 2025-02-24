@@ -3,19 +3,20 @@ import type { AlertType } from "@prisma/client";
 import { AlertStatus } from "@prisma/client";
 
 export class AlertMessagesService {
-  static async getAlertMessages(shopId: string) {
-    return prisma.alertMessage.findMany({
+  private prisma = prisma;
+  async getAlertMessages(shopId: string) {
+    return this.prisma.alertMessage.findMany({
       where: { shopId },
       orderBy: { createdAt: "desc" },
     });
   }
 
-  static async createAlert(data: {
+  async createAlert(data: {
     shopId: string;
     alertType: AlertType;
     message: string;
   }) {
-    return prisma.alertMessage.create({
+    return this.prisma.alertMessage.create({
       data: {
         shopId: data.shopId,
         alertType: data.alertType,
@@ -24,9 +25,15 @@ export class AlertMessagesService {
       },
     });
   }
+  async updateAlertStatus(id: string, status: AlertStatus) {
+    return this.prisma.alertMessage.update({
+      where: { id },
+      data: { status },
+    });
+  }
 
-  static async resendAlert(id: string) {
-    return prisma.alertMessage.update({
+  async resendAlert(id: string) {
+    return this.prisma.alertMessage.update({
       where: { id },
       data: { status: AlertStatus.Success },
     });
