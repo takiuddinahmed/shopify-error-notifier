@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "9a50f257fc35d3811f0cecf471c95ba4"
+application_url = "https://deaths-villages-sharp-brake.trycloudflare.com"
+embedded = true
+name = "Notifier"
+handle = "notifier-26"
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-01"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://deaths-villages-sharp-brake.trycloudflare.com/auth/callback",
+  "https://deaths-villages-sharp-brake.trycloudflare.com/auth/shopify/callback",
+  "https://deaths-villages-sharp-brake.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
