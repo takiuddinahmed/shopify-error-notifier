@@ -1,33 +1,34 @@
 import prisma from "app/db.server";
-import { AlertType, AlertStatus } from "@prisma/client";
+import type { AlertType } from "@prisma/client";
+import { AlertStatus } from "@prisma/client";
 
 export class AlertMessagesService {
-  static async getAlertMessages(shopId: string) {
-    return prisma.alertMessage.findMany({
+  private prisma = prisma;
+  async getAlertMessages(shopId: string) {
+    return this.prisma.alertMessage.findMany({
       where: { shopId },
       orderBy: { createdAt: "desc" },
     });
   }
 
-  static async createAlert(data: {
+  async createAlert(data: {
     shopId: string;
     alertType: AlertType;
     message: string;
   }) {
-    return prisma.alertMessage.create({
+    return this.prisma.alertMessage.create({
       data: {
         shopId: data.shopId,
         alertType: data.alertType,
         message: data.message,
-        status: AlertStatus.Success, // Defaulting to Success
+        status: AlertStatus.SUCCESS,
       },
     });
   }
-
-  static async resendAlert(id: string) {
-    return prisma.alertMessage.update({
+  async updateAlertStatus(id: string, status: AlertStatus) {
+    return this.prisma.alertMessage.update({
       where: { id },
-      data: { status: AlertStatus.Success }, // Assume resend updates status
+      data: { status },
     });
   }
 }

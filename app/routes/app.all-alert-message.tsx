@@ -10,29 +10,28 @@ import { AlertMessagesService } from "app/services/all-alert-message.server";
 import { authenticate } from "app/shopify.server";
 import type { AlertType, AlertMessage } from "@prisma/client";
 import { useState, useCallback } from "react";
+import { AlertConfigurationService } from "app/services/base.server";
 
+const alertMessageService = new AlertMessagesService();
+const baseService = new AlertConfigurationService();
 export async function loader({ request }: LoaderFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
-  const dbAlertMessages = await AlertMessagesService.getAlertMessages(shopId);
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
+  const dbAlertMessages = await alertMessageService.getAlertMessages(shopId);
 
   // Ensure createdAt is a Date object
   const alertMessages: AlertMessage[] = dbAlertMessages.map((alert) => ({
     ...alert,
-    createdAt: new Date(alert.createdAt), // Ensure createdAt is a Date
+    createdAt: new Date(alert.createdAt),
   }));
 
   return json({ alertMessages });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const shopId = "12345678"; // Should come from auth context
+  const { session } = await authenticate.admin(request);
+  const shopId = session.shop;
   const data = Object.fromEntries(await request.formData());
-
-  if (request.url.includes("/resend")) {
-    const id = data.id as string;
-    await AlertMessagesService.resendAlert(id);
-    return json({ success: true });
-  }
 
   const alertData = {
     shopId,
@@ -40,7 +39,11 @@ export async function action({ request }: ActionFunctionArgs) {
     message: data.message as string,
   };
 
-  await AlertMessagesService.createAlert(alertData);
+  await baseService.handleSendAlert(
+    shopId,
+    alertData.alertType,
+    alertData.message,
+  );
   return json({ success: true });
 }
 

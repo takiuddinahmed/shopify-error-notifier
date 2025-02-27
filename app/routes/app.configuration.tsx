@@ -12,7 +12,11 @@ import { authenticate } from "app/shopify.server";
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
   const shopId = session.shop;
-  const configuration = await ConfigurationService.getConfiguration(shopId);
+
+  const configService = new ConfigurationService(shopId);
+
+  const configuration = await configService.getConfiguration();
+
   return json({ configuration });
 }
 
@@ -22,7 +26,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const data = Object.fromEntries(await request.formData());
 
   const configurationData = {
-    shopId,
     productCreate: data.product_create === "true",
     productUpdate: data.product_update === "true",
     productDelete: data.product_delete === "true",
@@ -32,7 +35,10 @@ export async function action({ request }: ActionFunctionArgs) {
     systemIssue: data.system_issue === "true",
   };
 
-  await ConfigurationService.upsertConfiguration(configurationData);
+  const configService = new ConfigurationService(shopId);
+
+  await configService.upsertConfiguration(configurationData);
+
   return json({ success: true });
 }
 

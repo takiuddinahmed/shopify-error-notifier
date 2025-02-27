@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Page, Button, Card, Banner } from "@shopify/polaris";
+import { Page, Button, Card, Banner, BlockStack } from "@shopify/polaris";
 import { json, LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { authenticate } from "app/shopify.server";
 import { AlertConfigurationService } from "app/services/base.server";
-import { TelegramPublisherService } from "app/services/publisher.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
@@ -19,22 +18,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const alertType = "SYSTEM_ISSUE";
-    const message = "This is a test alert message";
+    const message = "This is a system test alert message";
 
-    const telegramConfig =
-      await AlertConfigurationService.getTelegramConfig(shopId);
+    const alertService = new AlertConfigurationService();
 
-    if (telegramConfig?.botToken && telegramConfig.chatIds.length > 0) {
-      await TelegramPublisherService.publishToTelegram(
-        { message },
-        {
-          botToken: telegramConfig.botToken,
-          chatIds: telegramConfig.chatIds,
-        },
-      );
-      return json({ success: true, message: "Alert published successfully!" });
-    }
-    return json({ success: false, message: "Telegram not configured" });
+    await alertService.handleSendAlert(shopId, alertType, message);
+    return json({ success: true, message: "Alert published successfully" });
   } catch (error) {
     return json({
       success: false,
@@ -46,10 +35,13 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function AlertPage() {
   const fetcher = useFetcher();
-  const [status, setStatus] = useState<{
+
+  const status = fetcher.data as {
     success: boolean;
     message: string;
-  } | null>(null);
+  };
+
+  console.log("status:", fetcher.data);
 
   const handlePublishAlert = () => {
     console.log("Publishing alert..."); // Debug log
@@ -60,7 +52,8 @@ export default function AlertPage() {
 
   return (
     <Page title="Publish Alert">
-      <Card>
+      <BlockStack gap="500">
+        {status && <Card>{status.message}</Card>}
         <Card>
           <Button
             onClick={handlePublishAlert}
@@ -69,7 +62,7 @@ export default function AlertPage() {
             Publish Alert
           </Button>
         </Card>
-      </Card>
+      </BlockStack>
     </Page>
   );
 }

@@ -1,35 +1,35 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "bb78030a5f9fcac6f1d678b7692800d8"
-application_url = "https://turbo-social-usual-interesting.trycloudflare.com"
+application_url = "https://counts-locations-architect-hamilton.trycloudflare.com"
 embedded = true
 name = "alert-notifier"
 handle = "alert-notifier"
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-01"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
   uri = "/webhooks/app/scopes_update"
 
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "read_products,write_products,read_orders"
 
 [auth]
 redirect_urls = [
-  "https://turbo-social-usual-interesting.trycloudflare.com/auth/callback",
-  "https://turbo-social-usual-interesting.trycloudflare.com/auth/shopify/callback",
-  "https://turbo-social-usual-interesting.trycloudflare.com/api/auth/callback"
+  "https://counts-locations-architect-hamilton.trycloudflare.com/auth/callback",
+  "https://counts-locations-architect-hamilton.trycloudflare.com/auth/shopify/callback",
+  "https://counts-locations-architect-hamilton.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

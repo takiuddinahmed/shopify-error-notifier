@@ -1,6 +1,8 @@
-import { AlertType } from "app/types/allAlerts";
+import type { AlertType } from "app/types/allAlerts";
 import prisma from "app/db.server";
-import { ReceiverConfiguration } from "@prisma/client";
+import { AlertStatus, type ReceiverConfiguration } from "@prisma/client";
+import { TelegramPublisherService } from "./publisher.server";
+import { AlertMessagesService } from "./all-alert-message.server";
 
 interface AlertConfiguration {
   shopId: string;
@@ -13,20 +15,24 @@ interface AlertConfiguration {
   systemIssue: boolean;
 }
 
-// interface ReceiverConfiguration {
-//   isTelegramEnabled: boolean;
-//   telegramBotToken?: string;
-//   telegramReceiverChatIds?: string;
-// }
-
 export class AlertConfigurationService {
-  // Get combined configuration for a shop
-  static async getShopConfiguration(shopId: string) {
+  private prismaClient;
+  private publisher;
+
+  constructor(
+    prismaClient = prisma,
+    telegramPublisher = new TelegramPublisherService(),
+  ) {
+    this.prismaClient = prismaClient;
+    this.publisher = telegramPublisher;
+  }
+
+  async getShopConfiguration(shopId: string) {
     const [alertConfig, receiverConfig] = await Promise.all([
-      prisma.configuration.findUnique({
+      this.prismaClient.configuration.findUnique({
         where: { shopId },
       }),
-      prisma.receiverConfiguration.findUnique({
+      this.prismaClient.receiverConfiguration.findUnique({
         where: { shopId },
       }),
     ]);
@@ -37,18 +43,14 @@ export class AlertConfigurationService {
     };
   }
 
-  // Check if an alert type is enabled for a shop
-  static async isAlertEnabled(
-    shopId: string,
-    alertType: AlertType,
-  ): Promise<boolean> {
+  async isAlertEnabled(shopId: string, alertType: AlertType): Promise<boolean> {
     const { alertConfig } = await this.getShopConfiguration(shopId);
     if (!alertConfig) return false;
 
     const configMap: Record<AlertType, keyof AlertConfiguration> = {
-      PRODUCT_CREATED: "productCreate",
-      PRODUCT_UPDATED: "productUpdate",
-      PRODUCT_DELETED: "productDelete",
+      PRODUCTS_CREATE: "productCreate",
+      PRODUCTS_UPDATE: "productUpdate",
+      PRODUCTS_DELETE: "productDelete",
       SIGN_IN: "signin",
       SIGN_UP: "signup",
       CHECK_OUT: "checkout",
@@ -58,25 +60,26 @@ export class AlertConfigurationService {
     return (alertConfig[configMap[alertType]] as boolean) ?? false;
   }
 
-  // Get receiver configuration for a shop
-  static async getReceiverConfiguration(
+  async getReceiverConfiguration(
     shopId: string,
   ): Promise<ReceiverConfiguration | null> {
     const { receiverConfig } = await this.getShopConfiguration(shopId);
     return receiverConfig;
   }
 
-  // Helper method to check if Telegram is enabled for a shop
-  static async isTelegramEnabled(shopId: string): Promise<boolean> {
+  async receiverPlatform(shopId: string): Promise<boolean> {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
-    return !!receiverConfig?.isTelegramEnabled;
+    return !!receiverConfig?.receiverPlatform;
   }
 
-  // Get Telegram configuration if enabled
-  static async getTelegramConfig(shopId: string) {
+  async getTelegramConfig(shopId: string) {
     const receiverConfig = await this.getReceiverConfiguration(shopId);
 
-    if (!receiverConfig?.isTelegramEnabled) {
+    if (
+      !receiverConfig?.receiverPlatform ||
+      !receiverConfig?.telegramBotToken ||
+      !receiverConfig?.telegramReceiverChatIds
+    ) {
       return null;
     }
 
@@ -84,5 +87,92 @@ export class AlertConfigurationService {
       botToken: receiverConfig.telegramBotToken,
       chatIds: receiverConfig.telegramReceiverChatIds?.split(",") || [],
     };
+  }
+
+  async handleSendAlert(
+    shopId: string,
+    alertType: AlertType,
+    message?: string,
+  ): Promise<void> {
+    const alertMessagesService = new AlertMessagesService();
+    let createdAlert;
+
+    try {
+      // Step 1: Check if alert is enabled for this shop and alert type
+      const isEnabled = await this.isAlertEnabled(shopId, alertType);
+      if (!isEnabled) {
+        console.log(`Alert type ${alertType} is disabled for shop ${shopId}`);
+        return;
+      }
+
+      // Step 2: Get receiver configuration and check if platform is enabled
+      const receiverConfig = await this.getReceiverConfiguration(shopId);
+      if (!receiverConfig?.receiverPlatform) {
+        console.log(`No receiver platform enabled for shop ${shopId}`);
+        return;
+      }
+
+      // Step 3: Create an alert message with "Pending" status
+      createdAlert = await alertMessagesService.createAlert({
+        shopId,
+        alertType,
+        message: message || "An alert has been triggered",
+      });
+
+      // Step 4: Route to appropriate publisher service based on platform
+      if (receiverConfig.receiverPlatform === "telegram") {
+        const telegramConfig = await this.getTelegramConfig(shopId);
+
+        const generatedMessage = {
+          message: message || "An alert has been triggered",
+          metadata: {},
+        };
+
+        if (telegramConfig) {
+          try {
+            await Promise.all(
+              telegramConfig.chatIds.map((chatId) =>
+                this.publisher.publishToTelegram(
+                  generatedMessage,
+                  telegramConfig,
+                ),
+              ),
+            );
+
+            // Update alert status to SUCCESS if all messages were sent successfully
+            await alertMessagesService.updateAlertStatus(
+              createdAlert.id,
+              AlertStatus.SUCCESS,
+            );
+          } catch (publishError) {
+            // Update alert status to ERROR if any message failed to send
+            await alertMessagesService.updateAlertStatus(
+              createdAlert.id,
+              AlertStatus.ERROR,
+            );
+            throw publishError;
+          }
+        }
+      } else {
+        // Update status to ERROR for unsupported platform
+        if (createdAlert) {
+          await alertMessagesService.updateAlertStatus(
+            createdAlert.id,
+            AlertStatus.ERROR,
+          );
+        }
+        throw new Error("Unsupported receiver platform");
+      }
+    } catch (error) {
+      // Ensure alert status is updated to ERROR if we have a created alert
+      if (createdAlert) {
+        await alertMessagesService.updateAlertStatus(
+          createdAlert.id,
+          AlertStatus.ERROR,
+        );
+      }
+      console.error("Error handling alert:", error);
+      throw error;
+    }
   }
 }

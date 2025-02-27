@@ -28,7 +28,7 @@ interface ReceiverConfig {
 
 interface AlertMessageReceiverProps {
   initialConfiguration: {
-    isTelegramEnabled: boolean;
+    receiverPlatform: string[];
     telegramBotToken?: string;
     telegramReceiverChatIds?: string;
   } | null;
@@ -63,7 +63,9 @@ export function AlertMessageReceiver({
   );
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(
-    initialConfiguration?.isTelegramEnabled ? ["telegram"] : [],
+    initialConfiguration?.receiverPlatform
+      ? initialConfiguration.receiverPlatform
+      : [],
   );
 
   const [config, setConfig] = useState<ReceiverConfig>({

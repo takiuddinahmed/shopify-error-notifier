@@ -3,16 +3,15 @@ interface TelegramMessage {
   metadata?: Record<string, any>;
 }
 
-interface TelegramConfig {
+interface TelegramCredentials {
   botToken: string;
   chatIds: string[];
 }
 
 export class TelegramPublisherService {
-  // Send message to Telegram
-  static async publishToTelegram(
+  async publishToTelegram(
     message: TelegramMessage,
-    config: TelegramConfig,
+    credentials: TelegramCredentials,
   ): Promise<void> {
     const formattedMessage = this.formatTelegramMessage(
       message.message,
@@ -21,8 +20,12 @@ export class TelegramPublisherService {
 
     try {
       await Promise.all(
-        config.chatIds.map((chatId) =>
-          this.sendToTelegramChat(formattedMessage, chatId, config.botToken),
+        credentials.chatIds.map((chatId) =>
+          this.sendToTelegramChat(
+            formattedMessage,
+            chatId,
+            credentials.botToken,
+          ),
         ),
       );
     } catch (error) {
@@ -34,37 +37,40 @@ export class TelegramPublisherService {
     }
   }
 
-  // Send to specific Telegram chat
-  private static async sendToTelegramChat(
+  private async sendToTelegramChat(
     message: string,
     chatId: string,
     botToken: string,
   ): Promise<void> {
     console.log("Sending to Telegram chat...", { message, chatId, botToken });
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${botToken}/sendMessage`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: "HTML",
+          }),
         },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: "HTML",
-        }),
-      },
-    );
+      );
 
-    console.log("Response from Telegram API:", response);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Telegram API error: ${JSON.stringify(error)}`);
+      console.log("Response from Telegram API:", response);
+      if (!response.ok) {
+        const errorBody = await response.json();
+        throw new Error(`Telegram API error: ${JSON.stringify(errorBody)}`);
+      }
+    } catch (error) {
+      console.error("Detailed fetch error:", error);
+      throw error;
     }
   }
 
-  // Format message for Telegram
-  private static formatTelegramMessage(
+  private formatTelegramMessage(
     message: string,
     metadata: Record<string, any>,
   ): string {

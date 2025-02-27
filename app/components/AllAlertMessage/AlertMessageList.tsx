@@ -26,7 +26,7 @@ export function AlertMessagesList({
 }: AlertMessagesListProps) {
   const fetcher = useFetcher();
   const [selectedAlertType, setSelectedAlertType] = useState<AlertType>(
-    AlertType.PRODUCT_CREATED,
+    AlertType.PRODUCTS_CREATE,
   );
   const [message, setMessage] = useState("");
 

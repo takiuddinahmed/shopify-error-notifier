@@ -1,10 +1,16 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 
 import { login } from "../../shopify.server";
 
 import styles from "./styles.module.css";
+
+import {
+  NotificationFilledIcon,
+  ClockIcon,
+  CheckCircleIcon,
+} from "@shopify/polaris-icons";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -22,36 +28,76 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
+        <h1 className={styles.heading}>Alert Notifier for Shopify</h1>
         <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
+          Never miss a critical event. Get instant notifications when things
+          happen in your store.
         </p>
+
         {showForm && (
-          <Form className={styles.form} method="post" action="/auth/login">
-            <label className={styles.label}>
-              <span>Shop domain</span>
-              <input className={styles.input} type="text" name="shop" />
-              <span>e.g: my-shop-domain.myshopify.com</span>
-            </label>
-            <button className={styles.button} type="submit">
-              Log in
-            </button>
-          </Form>
+          <div className={styles.card}>
+            <form className={styles.form} method="post" action="/auth/login">
+              <div className={styles.formContent}>
+                <h2 className={styles.headingLg}>Connect your store</h2>
+                <p className={styles.text}>
+                  Enter your Shopify store domain to get started with Alert
+                  Notifier
+                </p>
+                <div className={styles.inputGroup}>
+                  <input
+                    className={styles.textField}
+                    type="text"
+                    name="shop"
+                    placeholder="your-store.myshopify.com"
+                  />
+                  <button className={styles.button} type="submit">
+                    Log in
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         )}
-        <ul className={styles.list}>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-        </ul>
+
+        <div className={styles.features}>
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <NotificationFilledIcon />
+            </div>
+            <h1 className={styles.featureTitle}>Instant Alerts</h1>
+            <p className={styles.featureDescription}>
+              Receive real-time notifications for all important events in your
+              Shopify store
+            </p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <ClockIcon />
+            </div>
+            <h3 className={styles.featureTitle}>24/7 Monitoring</h3>
+            <p className={styles.featureDescription}>
+              Round-the-clock event monitoring ensures you never miss important
+              updates
+            </p>
+          </div>
+
+          <div className={styles.featureCard}>
+            <div className={styles.featureIcon}>
+              <CheckCircleIcon />
+            </div>
+            <h1 className={styles.featureTitle}>Reliable Delivery</h1>
+            <p className={styles.featureDescription}>
+              Guaranteed notification delivery through multiple channels for
+              critical events
+            </p>
+          </div>
+        </div>
+
+        <p className={styles.disclaimer}>
+          By connecting your store, you agree to receive notifications for
+          important events and updates.
+        </p>
       </div>
     </div>
   );

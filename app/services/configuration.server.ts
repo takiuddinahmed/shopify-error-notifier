@@ -12,19 +12,23 @@ interface ConfigurationData {
 }
 
 export class ConfigurationService {
-  static async getConfiguration(shopId: string) {
+  private shopId: string;
+
+  constructor(shopId: string) {
+    this.shopId = shopId;
+  }
+
+  async getConfiguration() {
     return prisma.configuration.findUnique({
-      where: { shopId },
+      where: { shopId: this.shopId },
     });
   }
 
-  static async upsertConfiguration(data: ConfigurationData) {
-    const { shopId, ...configData } = data;
-
+  async upsertConfiguration(configData: Omit<ConfigurationData, "shopId">) {
     return prisma.configuration.upsert({
-      where: { shopId },
+      where: { shopId: this.shopId },
       update: configData,
-      create: data,
+      create: { shopId: this.shopId, ...configData },
     });
   }
 }

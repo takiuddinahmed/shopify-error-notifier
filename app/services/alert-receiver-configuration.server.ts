@@ -2,25 +2,31 @@ import prisma from "app/db.server";
 
 interface ReceiverConfigurationData {
   shopId: string;
-  isTelegramEnabled: boolean;
+  receiverPlatform: string;
   telegramBotToken?: string;
   telegramReceiverChatIds?: string;
 }
 
 export class ReceiverService {
-  static async getConfiguration(shopId: string) {
+  private shopId: string;
+
+  constructor(shopId: string) {
+    this.shopId = shopId;
+  }
+
+  async getConfiguration() {
     return prisma.receiverConfiguration.findUnique({
-      where: { shopId },
+      where: { shopId: this.shopId },
     });
   }
 
-  static async upsertConfiguration(data: ReceiverConfigurationData) {
-    const { shopId, ...configData } = data;
-
+  async upsertConfiguration(
+    configData: Omit<ReceiverConfigurationData, "shopId">,
+  ) {
     return prisma.receiverConfiguration.upsert({
-      where: { shopId },
+      where: { shopId: this.shopId },
       update: configData,
-      create: data,
+      create: { shopId: this.shopId, ...configData },
     });
   }
 }
