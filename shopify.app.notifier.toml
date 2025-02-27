@@ -1,27 +1,26 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "e81152d0e3143005b2515f59a37d0a81"
-application_url = "https://responsibility-quarter-concord-organizing.trycloudflare.com"
+client_id = "63863e0da6ac8f90526aa0d345930008"
+application_url = "https://dresses-however-houses-testimony.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
 
 [build]
 include_config_on_deploy = true
-automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "read_products,write_products,read_orders"
 
 [auth]
 redirect_urls = [
-  "https://responsibility-quarter-concord-organizing.trycloudflare.com/auth/callback",
-  "https://responsibility-quarter-concord-organizing.trycloudflare.com/auth/shopify/callback",
-  "https://responsibility-quarter-concord-organizing.trycloudflare.com/api/auth/callback"
+  "https://dresses-however-houses-testimony.trycloudflare.com/auth/callback",
+  "https://dresses-however-houses-testimony.trycloudflare.com/auth/shopify/callback",
+  "https://dresses-however-houses-testimony.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
