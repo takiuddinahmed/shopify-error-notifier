@@ -43,25 +43,30 @@ export class TelegramPublisherService {
     botToken: string,
   ): Promise<void> {
     console.log("Sending to Telegram chat...", { message, chatId, botToken });
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      const response = await fetch(
+        `https://api.telegram.org/bot${botToken}/sendMessage`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: "HTML",
+          }),
         },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: message,
-          parse_mode: "HTML",
-        }),
-      },
-    );
+      );
 
-    console.log("Response from Telegram API:", response);
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Telegram API error: ${JSON.stringify(error)}`);
+      console.log("Response from Telegram API:", response);
+      if (!response.ok) {
+        const errorBody = await response.json();
+        throw new Error(`Telegram API error: ${JSON.stringify(errorBody)}`);
+      }
+    } catch (error) {
+      console.error("Detailed fetch error:", error);
+      throw error;
     }
   }
 

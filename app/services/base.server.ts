@@ -48,9 +48,9 @@ export class AlertConfigurationService {
     if (!alertConfig) return false;
 
     const configMap: Record<AlertType, keyof AlertConfiguration> = {
-      PRODUCT_CREATED: "productCreate",
-      PRODUCT_UPDATED: "productUpdate",
-      PRODUCT_DELETED: "productDelete",
+      PRODUCTS_CREATE: "productCreate",
+      PRODUCTS_UPDATE: "productUpdate",
+      PRODUCTS_DELETE: "productDelete",
       SIGN_IN: "signin",
       SIGN_UP: "signup",
       CHECK_OUT: "checkout",
@@ -142,13 +142,13 @@ export class AlertConfigurationService {
             // Update alert status to SUCCESS if all messages were sent successfully
             await alertMessagesService.updateAlertStatus(
               createdAlert.id,
-              AlertStatus.Success,
+              AlertStatus.SUCCESS,
             );
           } catch (publishError) {
             // Update alert status to ERROR if any message failed to send
             await alertMessagesService.updateAlertStatus(
               createdAlert.id,
-              AlertStatus.Error,
+              AlertStatus.ERROR,
             );
             throw publishError;
           }
@@ -158,7 +158,7 @@ export class AlertConfigurationService {
         if (createdAlert) {
           await alertMessagesService.updateAlertStatus(
             createdAlert.id,
-            AlertStatus.Error,
+            AlertStatus.ERROR,
           );
         }
         throw new Error("Unsupported receiver platform");
@@ -168,7 +168,7 @@ export class AlertConfigurationService {
       if (createdAlert) {
         await alertMessagesService.updateAlertStatus(
           createdAlert.id,
-          AlertStatus.Error,
+          AlertStatus.ERROR,
         );
       }
       console.error("Error handling alert:", error);

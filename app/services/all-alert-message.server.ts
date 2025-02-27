@@ -21,7 +21,7 @@ export class AlertMessagesService {
         shopId: data.shopId,
         alertType: data.alertType,
         message: data.message,
-        status: AlertStatus.Success,
+        status: AlertStatus.SUCCESS,
       },
     });
   }
@@ -29,13 +29,6 @@ export class AlertMessagesService {
     return this.prisma.alertMessage.update({
       where: { id },
       data: { status },
-    });
-  }
-
-  async resendAlert(id: string) {
-    return this.prisma.alertMessage.update({
-      where: { id },
-      data: { status: AlertStatus.Success },
     });
   }
 }
