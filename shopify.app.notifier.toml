@@ -1,14 +1,14 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "9a50f257fc35d3811f0cecf471c95ba4"
-application_url = "https://deaths-villages-sharp-brake.trycloudflare.com"
+client_id = "e81152d0e3143005b2515f59a37d0a81"
+application_url = "https://responsibility-quarter-concord-organizing.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
 
 [build]
-automatically_update_urls_on_dev = true
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-01"
@@ -19,9 +19,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://deaths-villages-sharp-brake.trycloudflare.com/auth/callback",
-  "https://deaths-villages-sharp-brake.trycloudflare.com/auth/shopify/callback",
-  "https://deaths-villages-sharp-brake.trycloudflare.com/api/auth/callback"
+  "https://responsibility-quarter-concord-organizing.trycloudflare.com/auth/callback",
+  "https://responsibility-quarter-concord-organizing.trycloudflare.com/auth/shopify/callback",
+  "https://responsibility-quarter-concord-organizing.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
