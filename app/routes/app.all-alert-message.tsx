@@ -14,7 +14,6 @@ import { AlertConfigurationService } from "app/services/base.server";
 
 const alertMessageService = new AlertMessagesService();
 const baseService = new AlertConfigurationService();
-// app/routes/all-alert-messages.tsx
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
@@ -23,11 +22,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   // Get pagination parameters
   let page = Number(url.searchParams.get("page")) || 1;
-  let perPage = Number(url.searchParams.get("perPage")) || 10;
+  let perPage = Number(url.searchParams.get("perPage")) || 15;
 
   // Validate numbers
   if (isNaN(page) || page < 1) page = 1;
-  if (isNaN(perPage) || perPage < 1) perPage = 10;
+  if (isNaN(perPage) || perPage < 1) perPage = 15;
 
   const dbResult = await alertMessageService.getAlertMessages(
     shopId,

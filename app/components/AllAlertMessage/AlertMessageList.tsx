@@ -61,16 +61,6 @@ export function AlertMessagesList({
     setSearchParams(newParams);
   };
 
-  const handlePerPageChange = useCallback(
-    (value: string) => {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set("perPage", value);
-      newParams.set("page", "1"); // Reset to first page
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams],
-  );
-
   const handleSubmit = useCallback(() => {
     if (!message.trim()) return;
 
@@ -91,26 +81,6 @@ export function AlertMessagesList({
   return (
     <>
       <Card>
-        <div
-          style={{
-            padding: "16px",
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Select
-            label="Items per page"
-            labelHidden
-            options={[
-              { label: "10", value: "10" },
-              { label: "25", value: "25" },
-              { label: "50", value: "50" },
-            ]}
-            value={perPage.toString()}
-            onChange={handlePerPageChange}
-            // style={{ width: "100px" }}
-          />
-        </div>
         <IndexTable
           itemCount={alertMessages.length}
           headings={[
