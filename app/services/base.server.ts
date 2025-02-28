@@ -113,7 +113,7 @@ export class AlertConfigurationService {
         return;
       }
 
-      // Step 3: Create an alert message with "Pending" status
+      // Step 3: Create or update an alert message
       if (alertId) {
         createdAlert = await alertMessagesService.updateAlertStatus(
           alertId,
@@ -138,16 +138,12 @@ export class AlertConfigurationService {
 
         if (telegramConfig) {
           try {
-            await Promise.all(
-              telegramConfig.chatIds.map((chatId) =>
-                this.publisher.publishToTelegram(
-                  generatedMessage,
-                  telegramConfig,
-                ),
-              ),
+            await this.publisher.publishToTelegram(
+              generatedMessage,
+              telegramConfig,
             );
 
-            // Update alert status to SUCCESS if all messages were sent successfully
+            // Update alert status to SUCCESS
             await alertMessagesService.updateAlertStatus(
               createdAlert.id,
               AlertStatus.SUCCESS,
