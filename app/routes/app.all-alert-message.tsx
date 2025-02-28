@@ -50,13 +50,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const { session } = await authenticate.admin(request);
-  const shopId = session.shop;
-  const data = Object.fromEntries(await request.formData());
+  const data = await request.formData();
+  const alertId = data.get("id") as string;
 
+  if (alertId) {
+    await baseService.handleResendAlert(alertId);
+    return json({ success: true });
+  }
+
+  const shopId = session.shop;
   const alertData = {
     shopId,
-    alertType: data.alertType as AlertType,
-    message: data.message as string,
+    alertType: data.get("alertType") as AlertType,
+    message: data.get("message") as string,
   };
 
   await baseService.handleSendAlert(

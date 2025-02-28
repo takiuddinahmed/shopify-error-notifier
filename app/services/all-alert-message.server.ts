@@ -39,4 +39,8 @@ export class AlertMessagesService {
       data: { status },
     });
   }
+
+  async findAlertMessageById(id: string) {
+    return this.prisma.alertMessage.findUnique({ where: { id } });
+  }
 }

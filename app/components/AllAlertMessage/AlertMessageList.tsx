@@ -10,6 +10,7 @@ import {
   Select,
   TextField,
   FormLayout,
+  Frame,
 } from "@shopify/polaris";
 import { AlertType, type AlertMessage } from "@prisma/client";
 
@@ -39,10 +40,9 @@ export function AlertMessagesList({
 
   const handleResend = useCallback(
     (id: string) => {
-      fetcher.submit(
-        { id },
-        { method: "POST", action: `/api/alerts/${id}/resend` },
-      );
+      const formData = new FormData();
+      formData.append("id", id);
+      fetcher.submit(formData, { method: "POST" });
     },
     [fetcher],
   );
@@ -79,7 +79,7 @@ export function AlertMessagesList({
   }));
 
   return (
-    <>
+    <Frame>
       <Card>
         <IndexTable
           itemCount={alertMessages.length}
@@ -122,7 +122,10 @@ export function AlertMessagesList({
                   <Button
                     size="slim"
                     onClick={() => handleResend(id)}
-                    loading={fetcher.state === "submitting"}
+                    loading={
+                      fetcher.state === "submitting" &&
+                      fetcher.formData?.get("id") === id
+                    }
                   >
                     Resend
                   </Button>
@@ -167,6 +170,6 @@ export function AlertMessagesList({
           </FormLayout>
         </Modal.Section>
       </Modal>
-    </>
+    </Frame>
   );
 }

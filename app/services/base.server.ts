@@ -93,6 +93,7 @@ export class AlertConfigurationService {
     shopId: string,
     alertType: AlertType,
     message?: string,
+    alertId?: string,
   ): Promise<void> {
     const alertMessagesService = new AlertMessagesService();
     let createdAlert;
@@ -113,11 +114,18 @@ export class AlertConfigurationService {
       }
 
       // Step 3: Create an alert message with "Pending" status
-      createdAlert = await alertMessagesService.createAlert({
-        shopId,
-        alertType,
-        message: message || "An alert has been triggered",
-      });
+      if (alertId) {
+        createdAlert = await alertMessagesService.updateAlertStatus(
+          alertId,
+          AlertStatus.PENDING,
+        );
+      } else {
+        createdAlert = await alertMessagesService.createAlert({
+          shopId,
+          alertType,
+          message: message || "An alert has been triggered",
+        });
+      }
 
       // Step 4: Route to appropriate publisher service based on platform
       if (receiverConfig.receiverPlatform === "telegram") {
@@ -174,5 +182,20 @@ export class AlertConfigurationService {
       console.error("Error handling alert:", error);
       throw error;
     }
+  }
+
+  async handleResendAlert(alertId: string): Promise<void> {
+    const alertMessagesService = new AlertMessagesService();
+    const alertMessage =
+      await alertMessagesService.findAlertMessageById(alertId);
+    if (!alertMessage) {
+      throw new Error("Alert message not found");
+    }
+    await this.handleSendAlert(
+      alertMessage.shopId,
+      alertMessage.alertType,
+      alertMessage.message,
+      alertId,
+    );
   }
 }
