@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "63863e0da6ac8f90526aa0d345930008"
-application_url = "https://logic-heater-honolulu-become.trycloudflare.com"
+application_url = "https://clips-took-eco-encourages.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
@@ -19,9 +19,9 @@ scopes = "read_products,write_products,read_orders"
 
 [auth]
 redirect_urls = [
-  "https://logic-heater-honolulu-become.trycloudflare.com/auth/callback",
-  "https://logic-heater-honolulu-become.trycloudflare.com/auth/shopify/callback",
-  "https://logic-heater-honolulu-become.trycloudflare.com/api/auth/callback"
+  "https://clips-took-eco-encourages.trycloudflare.com/auth/callback",
+  "https://clips-took-eco-encourages.trycloudflare.com/auth/shopify/callback",
+  "https://clips-took-eco-encourages.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

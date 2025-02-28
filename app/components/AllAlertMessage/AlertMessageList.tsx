@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useSearchParams } from "@remix-run/react";
 import {
   Card,
   IndexTable,
@@ -17,14 +17,21 @@ interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
   modalActive: boolean;
   onModalChange: (active: boolean) => void;
+  total: number;
+  currentPage: number;
+  perPage: number;
 }
 
 export function AlertMessagesList({
   alertMessages,
   modalActive,
   onModalChange,
+  total,
+  currentPage,
+  perPage,
 }: AlertMessagesListProps) {
   const fetcher = useFetcher();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedAlertType, setSelectedAlertType] = useState<AlertType>(
     AlertType.PRODUCTS_CREATE,
   );
@@ -48,6 +55,22 @@ export function AlertMessagesList({
     setMessage(value);
   }, []);
 
+  const handlePageChange = (newPage: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", newPage.toString());
+    setSearchParams(newParams);
+  };
+
+  const handlePerPageChange = useCallback(
+    (value: string) => {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("perPage", value);
+      newParams.set("page", "1"); // Reset to first page
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams],
+  );
+
   const handleSubmit = useCallback(() => {
     if (!message.trim()) return;
 
@@ -68,6 +91,26 @@ export function AlertMessagesList({
   return (
     <>
       <Card>
+        <div
+          style={{
+            padding: "16px",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Select
+            label="Items per page"
+            labelHidden
+            options={[
+              { label: "10", value: "10" },
+              { label: "25", value: "25" },
+              { label: "50", value: "50" },
+            ]}
+            value={perPage.toString()}
+            onChange={handlePerPageChange}
+            // style={{ width: "100px" }}
+          />
+        </div>
         <IndexTable
           itemCount={alertMessages.length}
           headings={[
@@ -78,6 +121,16 @@ export function AlertMessagesList({
             { title: "Resend" },
           ]}
           selectable={false}
+          pagination={{
+            hasNext: currentPage * perPage < total,
+            hasPrevious: currentPage > 1,
+            onNext: () => handlePageChange(currentPage + 1),
+            onPrevious: () => handlePageChange(currentPage - 1),
+            label: `Showing ${(currentPage - 1) * perPage + 1}-${Math.min(
+              currentPage * perPage,
+              total,
+            )} of ${total} results`,
+          }}
         >
           {alertMessages.map(
             ({ id, alertType, message, createdAt, status }, index) => (
