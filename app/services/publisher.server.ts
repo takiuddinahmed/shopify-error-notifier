@@ -1,3 +1,5 @@
+import { AlertTemplateService } from "./alert-template.server";
+
 interface TelegramMessage {
   message: string;
   metadata?: Record<string, any>;
@@ -9,6 +11,11 @@ interface TelegramCredentials {
 }
 
 export class TelegramPublisherService {
+  private templateService: AlertTemplateService;
+
+  constructor(templateService = new AlertTemplateService()) {
+    this.templateService = templateService;
+  }
   async publishToTelegram(
     message: TelegramMessage,
     credentials: TelegramCredentials,
@@ -58,7 +65,6 @@ export class TelegramPublisherService {
           }),
         },
       );
-
       console.log("Response from Telegram API:", response);
       if (!response.ok) {
         const errorBody = await response.json();
@@ -74,13 +80,17 @@ export class TelegramPublisherService {
     message: string,
     metadata: Record<string, any>,
   ): string {
-    let formatted = `🔔 <b>New Alert</b>\n\n${message}`;
+    // If the message already follows our template format, just add metadata
+    if (message.startsWith("🔔")) {
+      return metadata && Object.keys(metadata).length > 0
+        ? message + this.templateService.formatMetadata(metadata)
+        : message;
+    }
 
+    // Otherwise, format it with the default template
+    let formatted = message;
     if (Object.keys(metadata).length > 0) {
-      formatted += "\n\n<b>Additional Information:</b>";
-      for (const [key, value] of Object.entries(metadata)) {
-        formatted += `\n<b>${key}:</b> ${value}`;
-      }
+      formatted += this.templateService.formatMetadata(metadata);
     }
 
     return formatted;
