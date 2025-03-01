@@ -34,6 +34,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         if (product?.title) {
           templateData.productTitle = product.title;
         }
+        if (product?.id && shop) {
+          const storeName = shop.split(".")[0];
+          templateData.productUrl = `https://admin.shopify.com/store/${storeName}/products/${product.id}`;
+        }
 
         const message = templateService.getTemplateForAlertType(
           AlertType.PRODUCTS_CREATE,
@@ -53,6 +57,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         const product = payload;
         if (product?.title) {
           templateData.productTitle = product.title;
+        }
+        if (product?.id && shop) {
+          const storeName = shop.split(".")[0];
+          templateData.productUrl = `https://admin.shopify.com/store/${storeName}/products/${product.id}`;
         }
 
         const message = templateService.getTemplateForAlertType(

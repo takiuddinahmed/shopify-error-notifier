@@ -5,11 +5,11 @@ export interface AlertTemplateData {
   shopName?: string;
   productTitle?: string;
   productId?: string;
+  productUrl?: string;
   orderId?: string;
   customerName?: string;
   customerEmail?: string;
   errorMessage?: string;
-  // Add other relevant template data fields as needed
 }
 
 export class AlertTemplateService {
@@ -31,7 +31,7 @@ export class AlertTemplateService {
           "New Product Created",
           `A new product${data.productTitle ? ` <b>"${data.productTitle}"</b>` : ""} has been created${
             data.shopName ? ` in shop "${data.shopName}"` : ""
-          }.`,
+          }.${data.productUrl ? `\n\n<a href="${data.productUrl}">View Product</a>` : ""}`,
         );
 
       case "PRODUCTS_UPDATE":
@@ -39,7 +39,7 @@ export class AlertTemplateService {
           "Product Updated",
           `A product${data.productTitle ? ` <b>"${data.productTitle}"</b>` : ""} has been updated${
             data.shopName ? ` in shop "${data.shopName}"` : ""
-          }.`,
+          }.${data.productUrl ? `\n\n<a href="${data.productUrl}">View Product</a>` : ""}`,
         );
 
       case "PRODUCTS_DELETE":
