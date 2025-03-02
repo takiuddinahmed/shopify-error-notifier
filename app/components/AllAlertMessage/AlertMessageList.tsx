@@ -14,7 +14,8 @@ import {
   ButtonGroup,
 } from "@shopify/polaris";
 import { AlertType, type AlertMessage } from "@prisma/client";
-
+import striptags from "striptags";
+import DOMPurify from "dompurify";
 interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
   modalActive: boolean;
@@ -24,17 +25,11 @@ interface AlertMessagesListProps {
   perPage: number;
 }
 
-// Helper function to strip HTML tags and truncate text
-const stripHtml = (html: string) => {
-  const tempElement = document.createElement("div");
-  tempElement.innerHTML = html;
-  return tempElement.textContent || tempElement.innerText || "";
-};
-
 // Helper function to truncate text to specified length with ellipsis
 const truncateText = (text: string, maxLength: number) => {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + "...";
+  const cleanText = striptags(text);
+  if (cleanText.length <= maxLength) return cleanText;
+  return cleanText.slice(0, maxLength) + "...";
 };
 
 export function AlertMessagesList({
@@ -215,7 +210,9 @@ export function AlertMessagesList({
       >
         <Modal.Section>
           <div
-            dangerouslySetInnerHTML={{ __html: selectedMessage }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(selectedMessage),
+            }}
             style={{ padding: "16px" }}
           />
         </Modal.Section>

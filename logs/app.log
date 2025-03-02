@@ -39,3 +39,15 @@
 [2025-03-02T09:41:19.122Z] INFO: Sending Telegram message
 [2025-03-02T09:41:20.077Z] INFO: Successfully sent alert cm7rfyjjf000hv1ukwi6kfc1r to Telegram
 [2025-03-02T09:41:20.080Z] INFO: Product updated alert processed
+[2025-03-02T16:26:39.828Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:26:39.831Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T16:39:40.029Z] INFO: Loading receiver configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:39:40.035Z] INFO: Configuration found
+[2025-03-02T16:39:43.031Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:39:43.034Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T16:39:44.702Z] INFO: Loading receiver configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:39:44.712Z] INFO: Configuration found
+[2025-03-02T16:39:52.303Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:39:52.306Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T16:40:26.840Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T16:40:26.853Z] INFO: Successfully fetched 15 alerts
