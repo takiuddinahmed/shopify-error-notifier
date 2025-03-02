@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useFetcher, useSearchParams } from "@remix-run/react";
 import {
   Card,
@@ -11,8 +11,11 @@ import {
   TextField,
   FormLayout,
   Frame,
+  ButtonGroup,
 } from "@shopify/polaris";
 import { AlertType, type AlertMessage } from "@prisma/client";
+import striptags from "striptags";
+import DOMPurify from "isomorphic-dompurify";
 
 interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
@@ -22,6 +25,13 @@ interface AlertMessagesListProps {
   currentPage: number;
   perPage: number;
 }
+
+// Helper function to truncate text to specified length with ellipsis
+const truncateText = (text: string, maxLength: number) => {
+  const cleanText = striptags(text);
+  if (cleanText.length <= maxLength) return cleanText;
+  return cleanText.slice(0, maxLength) + "...";
+};
 
 export function AlertMessagesList({
   alertMessages,
@@ -37,6 +47,8 @@ export function AlertMessagesList({
     AlertType.PRODUCTS_CREATE,
   );
   const [message, setMessage] = useState("");
+  const [viewMessageModalActive, setViewMessageModalActive] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState("");
 
   const handleResend = useCallback(
     (id: string) => {
@@ -46,6 +58,11 @@ export function AlertMessagesList({
     },
     [fetcher],
   );
+
+  const handleViewMessage = useCallback((message: string) => {
+    setSelectedMessage(message);
+    setViewMessageModalActive(true);
+  }, []);
 
   const handleAlertTypeChange = useCallback((value: string) => {
     setSelectedAlertType(value as AlertType);
@@ -88,7 +105,7 @@ export function AlertMessagesList({
             { title: "Message" },
             { title: "Time" },
             { title: "Status" },
-            { title: "Resend" },
+            { title: "Actions" },
           ]}
           selectable={false}
           pagination={{
@@ -111,7 +128,7 @@ export function AlertMessagesList({
                       alertType}
                   </Text>
                 </IndexTable.Cell>
-                <IndexTable.Cell>{message}</IndexTable.Cell>
+                <IndexTable.Cell>{truncateText(message, 30)}</IndexTable.Cell>
                 <IndexTable.Cell>
                   {new Date(createdAt).toLocaleString()}
                 </IndexTable.Cell>
@@ -119,16 +136,24 @@ export function AlertMessagesList({
                   <Badge>{status}</Badge>
                 </IndexTable.Cell>
                 <IndexTable.Cell>
-                  <Button
-                    size="slim"
-                    onClick={() => handleResend(id)}
-                    loading={
-                      fetcher.state === "submitting" &&
-                      fetcher.formData?.get("id") === id
-                    }
-                  >
-                    Resend
-                  </Button>
+                  <ButtonGroup>
+                    <Button
+                      size="slim"
+                      onClick={() => handleViewMessage(message)}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="slim"
+                      onClick={() => handleResend(id)}
+                      loading={
+                        fetcher.state === "submitting" &&
+                        fetcher.formData?.get("id") === id
+                      }
+                    >
+                      Resend
+                    </Button>
+                  </ButtonGroup>
                 </IndexTable.Cell>
               </IndexTable.Row>
             ),
@@ -136,6 +161,7 @@ export function AlertMessagesList({
         </IndexTable>
       </Card>
 
+      {/* Create Alert Modal */}
       <Modal
         open={modalActive}
         onClose={() => onModalChange(false)}
@@ -168,6 +194,29 @@ export function AlertMessagesList({
               autoComplete="off"
             />
           </FormLayout>
+        </Modal.Section>
+      </Modal>
+
+      {/* View Message Modal */}
+      <Modal
+        open={viewMessageModalActive}
+        onClose={() => setViewMessageModalActive(false)}
+        title="Alert Message"
+        primaryAction={{
+          content: "Close",
+          onAction: () => setViewMessageModalActive(false),
+        }}
+      >
+        <Modal.Section>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: useMemo(
+                () => DOMPurify.sanitize(selectedMessage),
+                [selectedMessage],
+              ),
+            }}
+            style={{ padding: "16px" }}
+          />
         </Modal.Section>
       </Modal>
     </Frame>
