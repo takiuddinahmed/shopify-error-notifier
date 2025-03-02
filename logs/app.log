@@ -13,3 +13,7 @@
 [2025-03-02T08:27:02.545Z] INFO: Successfully fetched 15 alerts
 [2025-03-02T08:27:47.514Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
 [2025-03-02T08:27:47.519Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T08:37:49.332Z] INFO: Loading configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T08:37:49.339Z] INFO: Configuration loaded
+[2025-03-02T08:38:38.488Z] INFO: Loading configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T08:38:38.491Z] INFO: Configuration loaded
