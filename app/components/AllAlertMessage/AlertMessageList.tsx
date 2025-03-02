@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useFetcher, useSearchParams } from "@remix-run/react";
 import {
   Card,
@@ -15,7 +15,8 @@ import {
 } from "@shopify/polaris";
 import { AlertType, type AlertMessage } from "@prisma/client";
 import striptags from "striptags";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
+
 interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
   modalActive: boolean;
@@ -127,9 +128,7 @@ export function AlertMessagesList({
                       alertType}
                   </Text>
                 </IndexTable.Cell>
-                <IndexTable.Cell>
-                  {truncateText(stripHtml(message), 30)}
-                </IndexTable.Cell>
+                <IndexTable.Cell>{truncateText(message, 30)}</IndexTable.Cell>
                 <IndexTable.Cell>
                   {new Date(createdAt).toLocaleString()}
                 </IndexTable.Cell>
@@ -211,7 +210,10 @@ export function AlertMessagesList({
         <Modal.Section>
           <div
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(selectedMessage),
+              __html: useMemo(
+                () => DOMPurify.sanitize(selectedMessage),
+                [selectedMessage],
+              ),
             }}
             style={{ padding: "16px" }}
           />
