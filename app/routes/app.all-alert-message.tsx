@@ -11,6 +11,7 @@ import { authenticate } from "app/shopify.server";
 import type { AlertType } from "@prisma/client";
 import { useState, useCallback } from "react";
 import { AlertConfigurationService } from "app/services/base.server";
+import logger from "app/utils/logger";
 
 const alertMessageService = new AlertMessagesService();
 const baseService = new AlertConfigurationService();
@@ -20,57 +21,107 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const shopId = session.shop;
   const url = new URL(request.url);
 
+  logger.info(`Loading alert messages for shop: ${shopId}`);
+
   // Get pagination parameters
   let page = Number(url.searchParams.get("page")) || 1;
   let perPage = Number(url.searchParams.get("perPage")) || 15;
 
   // Validate numbers
-  if (isNaN(page) || page < 1) page = 1;
-  if (isNaN(perPage) || perPage < 1) perPage = 15;
+  if (isNaN(page) || page < 1) {
+    logger.warn(`Invalid page number: ${page}, resetting to 1`);
+    page = 1;
+  }
+  if (isNaN(perPage) || perPage < 1) {
+    logger.warn(`Invalid perPage value: ${perPage}, resetting to 15`);
+    perPage = 15;
+  }
 
-  const dbResult = await alertMessageService.getAlertMessages(
-    shopId,
-    page,
-    perPage,
-  );
+  try {
+    const dbResult = await alertMessageService.getAlertMessages(
+      shopId,
+      page,
+      perPage,
+    );
 
-  // Convert dates
-  const alertMessages = dbResult.alertMessages.map((alert) => ({
-    ...alert,
-    createdAt: new Date(alert.createdAt),
-  }));
+    logger.info(
+      `Successfully fetched ${dbResult.alertMessages.length} alerts`,
+      {
+        shopId,
+        page,
+        perPage,
+      },
+    );
 
-  return json({
-    alertMessages,
-    total: dbResult.total,
-    currentPage: page,
-    perPage,
-  });
+    // Convert dates
+    const alertMessages = dbResult.alertMessages.map((alert) => ({
+      ...alert,
+      createdAt: new Date(alert.createdAt),
+    }));
+
+    return json({
+      alertMessages,
+      total: dbResult.total,
+      currentPage: page,
+      perPage,
+    });
+  } catch (error: any) {
+    logger.error("Failed to fetch alert messages", {
+      error: error.message,
+      shopId,
+      stack: error.stack,
+    });
+    throw new Response("Internal Server Error", { status: 500 });
+  }
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const { session } = await authenticate.admin(request);
-  const data = await request.formData();
-  const alertId = data.get("id") as string;
-
-  if (alertId) {
-    await baseService.handleResendAlert(alertId);
-    return json({ success: true });
-  }
-
   const shopId = session.shop;
-  const alertData = {
-    shopId,
-    alertType: data.get("alertType") as AlertType,
-    message: data.get("message") as string,
-  };
 
-  await baseService.handleSendAlert(
-    shopId,
-    alertData.alertType,
-    alertData.message,
-  );
-  return json({ success: true });
+  try {
+    const data = await request.formData();
+    const alertId = data.get("id") as string;
+
+    logger.info(`Processing action for shop: ${shopId}`);
+
+    if (alertId) {
+      logger.info(`Resending alert with ID: ${alertId}`);
+      await baseService.handleResendAlert(alertId);
+      logger.info(`Successfully resent alert: ${alertId}`);
+      return json({ success: true });
+    }
+
+    const alertData = {
+      shopId,
+      alertType: data.get("alertType") as AlertType,
+      message: data.get("message") as string,
+    };
+
+    logger.info("Creating new alert", {
+      alertType: alertData.alertType,
+      message: alertData.message.substring(0, 50) + "...",
+    });
+
+    await baseService.handleSendAlert(
+      shopId,
+      alertData.alertType,
+      alertData.message,
+    );
+
+    logger.info("Alert created successfully");
+    return json({ success: true });
+  } catch (error: any) {
+    logger.error("Action failed", {
+      error: error.message,
+      stack: error.stack,
+      shopId,
+    });
+    return json(
+      { success: false, error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
 
 export default function AllAlertMessages() {
