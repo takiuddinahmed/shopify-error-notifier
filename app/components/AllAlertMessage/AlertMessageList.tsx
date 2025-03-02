@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useSearchParams } from "@remix-run/react";
 import {
   Card,
   IndexTable,
@@ -10,6 +10,7 @@ import {
   Select,
   TextField,
   FormLayout,
+  Frame,
 } from "@shopify/polaris";
 import { AlertType, type AlertMessage } from "@prisma/client";
 
@@ -17,14 +18,21 @@ interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
   modalActive: boolean;
   onModalChange: (active: boolean) => void;
+  total: number;
+  currentPage: number;
+  perPage: number;
 }
 
 export function AlertMessagesList({
   alertMessages,
   modalActive,
   onModalChange,
+  total,
+  currentPage,
+  perPage,
 }: AlertMessagesListProps) {
   const fetcher = useFetcher();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedAlertType, setSelectedAlertType] = useState<AlertType>(
     AlertType.PRODUCTS_CREATE,
   );
@@ -32,10 +40,9 @@ export function AlertMessagesList({
 
   const handleResend = useCallback(
     (id: string) => {
-      fetcher.submit(
-        { id },
-        { method: "POST", action: `/api/alerts/${id}/resend` },
-      );
+      const formData = new FormData();
+      formData.append("id", id);
+      fetcher.submit(formData, { method: "POST" });
     },
     [fetcher],
   );
@@ -47,6 +54,12 @@ export function AlertMessagesList({
   const handleMessageChange = useCallback((value: string) => {
     setMessage(value);
   }, []);
+
+  const handlePageChange = (newPage: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", newPage.toString());
+    setSearchParams(newParams);
+  };
 
   const handleSubmit = useCallback(() => {
     if (!message.trim()) return;
@@ -66,7 +79,7 @@ export function AlertMessagesList({
   }));
 
   return (
-    <>
+    <Frame>
       <Card>
         <IndexTable
           itemCount={alertMessages.length}
@@ -78,6 +91,16 @@ export function AlertMessagesList({
             { title: "Resend" },
           ]}
           selectable={false}
+          pagination={{
+            hasNext: currentPage * perPage < total,
+            hasPrevious: currentPage > 1,
+            onNext: () => handlePageChange(currentPage + 1),
+            onPrevious: () => handlePageChange(currentPage - 1),
+            label: `Showing ${(currentPage - 1) * perPage + 1}-${Math.min(
+              currentPage * perPage,
+              total,
+            )} of ${total} results`,
+          }}
         >
           {alertMessages.map(
             ({ id, alertType, message, createdAt, status }, index) => (
@@ -99,7 +122,10 @@ export function AlertMessagesList({
                   <Button
                     size="slim"
                     onClick={() => handleResend(id)}
-                    loading={fetcher.state === "submitting"}
+                    loading={
+                      fetcher.state === "submitting" &&
+                      fetcher.formData?.get("id") === id
+                    }
                   >
                     Resend
                   </Button>
@@ -144,6 +170,6 @@ export function AlertMessagesList({
           </FormLayout>
         </Modal.Section>
       </Modal>
-    </>
+    </Frame>
   );
 }
