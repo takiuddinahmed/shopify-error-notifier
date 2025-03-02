@@ -2,3 +2,25 @@
 [2025-03-02T18:00:28.370Z] INFO: Configuration found
 [2025-03-02T18:00:34.471Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
 [2025-03-02T18:00:34.474Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T18:01:35.137Z] INFO: Loading receiver configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:01:35.145Z] INFO: Configuration found
+[2025-03-02T18:01:45.862Z] INFO: Loading configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:01:45.864Z] INFO: Configuration loaded
+[2025-03-02T18:01:51.657Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:01:51.663Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T18:01:56.979Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:01:56.982Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T18:02:01.328Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:02:01.334Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T18:02:05.129Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:02:05.136Z] INFO: Successfully fetched 14 alerts
+[2025-03-02T18:03:56.364Z] INFO: Loading configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:03:56.369Z] INFO: Configuration loaded
+[2025-03-02T18:04:01.819Z] INFO: Loading receiver configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:04:01.822Z] INFO: Configuration found
+[2025-03-02T18:04:09.194Z] INFO: Loading alert messages for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:04:09.197Z] INFO: Successfully fetched 15 alerts
+[2025-03-02T18:04:17.316Z] INFO: Loading receiver configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:04:17.317Z] INFO: Configuration found
+[2025-03-02T18:04:23.646Z] INFO: Loading configuration for shop: notifier-app-test-store.myshopify.com
+[2025-03-02T18:04:23.654Z] INFO: Configuration loaded
