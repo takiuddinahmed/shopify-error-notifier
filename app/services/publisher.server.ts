@@ -1,3 +1,4 @@
+import logger from "app/utils/logger";
 import { AlertTemplateService } from "./alert-template.server";
 
 interface TelegramMessage {
@@ -20,12 +21,17 @@ export class TelegramPublisherService {
     message: TelegramMessage,
     credentials: TelegramCredentials,
   ): Promise<void> {
+    logger.debug("Formatting Telegram message");
     const formattedMessage = this.formatTelegramMessage(
       message.message,
       message.metadata || {},
     );
 
     try {
+      logger.info("Sending Telegram message", {
+        chatCount: credentials.chatIds.length,
+        messageLength: formattedMessage.length,
+      });
       await Promise.all(
         credentials.chatIds.map((chatId) =>
           this.sendToTelegramChat(
@@ -35,12 +41,14 @@ export class TelegramPublisherService {
           ),
         ),
       );
-    } catch (error) {
-      throw new Error(
-        `Failed to send Telegram message: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-      );
+      logger.debug("Telegram message(s) sent successfully");
+    } catch (error: any) {
+      logger.error("Telegram publish failed", {
+        error: error.message,
+        chatCount: credentials.chatIds.length,
+        stack: error.stack,
+      });
+      throw error;
     }
   }
 
@@ -49,7 +57,9 @@ export class TelegramPublisherService {
     chatId: string,
     botToken: string,
   ): Promise<void> {
-    console.log("Sending to Telegram chat...", { message, chatId, botToken });
+    logger.debug("Sending to Telegram chat", {
+      chatId: chatId.slice(0, 3) + "***",
+    });
     try {
       const response = await fetch(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -65,13 +75,25 @@ export class TelegramPublisherService {
           }),
         },
       );
-      console.log("Response from Telegram API:", response);
       if (!response.ok) {
         const errorBody = await response.json();
-        throw new Error(`Telegram API error: ${JSON.stringify(errorBody)}`);
+        logger.error("Telegram API error", {
+          status: response.status,
+          errorCode: errorBody.error_code,
+          chatId: chatId.slice(0, 3) + "***",
+        });
+        throw new Error(`Telegram API error: ${response.status}`);
       }
-    } catch (error) {
-      console.error("Detailed fetch error:", error);
+      logger.debug("Telegram message delivered", {
+        chatId: chatId.slice(0, 3) + "***",
+        status: response.status,
+      });
+    } catch (error: any) {
+      logger.error("Telegram send failed", {
+        error: error.message,
+        chatId: chatId.slice(0, 3) + "***",
+        stack: error.stack,
+      });
       throw error;
     }
   }

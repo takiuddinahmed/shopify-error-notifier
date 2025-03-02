@@ -7,30 +7,45 @@ import {
   AlertTemplateService,
   type AlertTemplateData,
 } from "app/services/alert-template.server";
+import logger from "app/utils/logger";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  console.log("=== WEBHOOK ROUTE HIT ===");
+  logger.debug("Webhook route triggered", { method: request.method });
   const alertService = new AlertConfigurationService();
   const templateService = new AlertTemplateService();
 
   try {
-    const { payload, topic, shop, session, admin } =
+    const { payload, topic, shop, session } =
       await authenticate.webhook(request);
-
     const shopId = session?.shop;
+
+    logger.info("Webhook received", {
+      topic,
+      shop: shop?.replace(".myshopify.com", ""),
+      payloadType: typeof payload,
+    });
+
     if (!shopId) {
-      console.log("No shop ID available in session");
-      return new Response();
+      logger.warn("Webhook request missing shop ID", {
+        shop,
+        topic,
+        hasSession: !!session,
+      });
+      return new Response(null, { status: 200 });
     }
 
-    // Create template data with shop info
     const templateData: AlertTemplateData = {
-      shopName: shop || "Your Shop",
+      shopName: shop?.replace(".myshopify.com", "") || "Your Shop",
     };
 
     switch (topic) {
       case "PRODUCTS_CREATE": {
         const product = payload;
+        logger.debug("Processing PRODUCTS_CREATE webhook", {
+          productId: product?.id,
+          shopId,
+        });
+
         if (product?.title) {
           templateData.productTitle = product.title;
         }
@@ -49,12 +64,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           AlertType.PRODUCTS_CREATE,
           message,
         );
-        console.log("Product created notification sent");
+        logger.info("Product created alert processed", {
+          shopId,
+          productId: product?.id,
+          messageLength: message.length,
+        });
         break;
       }
 
       case "PRODUCTS_UPDATE": {
         const product = payload;
+        logger.debug("Processing PRODUCTS_UPDATE webhook", {
+          productId: product?.id,
+          shopId,
+        });
+
         if (product?.title) {
           templateData.productTitle = product.title;
         }
@@ -73,11 +97,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           AlertType.PRODUCTS_UPDATE,
           message,
         );
-        console.log("Product updated notification sent");
+        logger.info("Product updated alert processed", {
+          shopId,
+          productId: product?.id,
+          messageLength: message.length,
+        });
         break;
       }
 
       case "PRODUCTS_DELETE": {
+        logger.debug("Processing PRODUCTS_DELETE webhook", { shopId });
         const message = templateService.getTemplateForAlertType(
           AlertType.PRODUCTS_DELETE,
           templateData,
@@ -88,12 +117,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           AlertType.PRODUCTS_DELETE,
           message,
         );
-        console.log("Product deleted notification sent");
+        logger.info("Product deleted alert processed", {
+          shopId,
+          messageLength: message.length,
+        });
         break;
       }
 
       case "ORDERS_PAID": {
         const order = payload;
+        logger.debug("Processing ORDERS_PAID webhook", {
+          orderId: order?.id,
+          shopId,
+        });
+
         if (order?.id) {
           templateData.orderId = order.id.toString();
         }
@@ -108,12 +145,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           AlertType.CHECK_OUT,
           message,
         );
-        console.log("Order paid notification sent");
+        logger.info("Order paid alert processed", {
+          shopId,
+          orderId: order?.id,
+          messageLength: message.length,
+        });
         break;
       }
 
       case "CUSTOMERS_CREATE": {
         const customer = payload;
+        logger.debug("Processing CUSTOMERS_CREATE webhook", {
+          customerId: customer?.id,
+          shopId,
+        });
+
         if (customer?.firstName) {
           templateData.customerName =
             customer.firstName +
@@ -126,12 +172,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         );
 
         await alertService.handleSendAlert(shopId, AlertType.SIGN_UP, message);
-        console.log("Customer created notification sent");
+        logger.info("Customer created alert processed", {
+          shopId,
+          customerId: customer?.id,
+          messageLength: message.length,
+        });
         break;
       }
 
       case "SYSTEM_ISSUE": {
         const error = payload;
+        logger.warn("Processing SYSTEM_ISSUE webhook", {
+          shopId,
+          errorType: error?.type,
+        });
+
         if (error?.message) {
           templateData.errorMessage = error.message;
         }
@@ -146,13 +201,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           AlertType.SYSTEM_ISSUE,
           message,
         );
-        console.log("System issue notification sent");
+        logger.error("System issue alert processed", {
+          shopId,
+          errorMessage: error?.message,
+          messageLength: message.length,
+        });
         break;
       }
+
+      default:
+        logger.warn("Unhandled webhook topic received", { topic, shopId });
     }
   } catch (error) {
-    console.error("Webhook authentication error:", error);
+    logger.error("Webhook processing failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 
-  return new Response();
+  return new Response(null, { status: 200 });
 };
