@@ -2,8 +2,7 @@ node_modules
 
 /.cache
 /build
-/logs/app.log
-/logs/app.error
+logs/*.log
 /app/build
 /public/build/
 /public/_dev
