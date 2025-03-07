@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "742b948298a33069d6eb11d1c7233982"
-application_url = "https://designing-seeker-duck-awesome.trycloudflare.com"
+application_url = "https://notifier.elyxxa.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
@@ -20,9 +20,9 @@ scopes = "read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://designing-seeker-duck-awesome.trycloudflare.com/auth/callback",
-  "https://designing-seeker-duck-awesome.trycloudflare.com/auth/shopify/callback",
-  "https://designing-seeker-duck-awesome.trycloudflare.com/api/auth/callback"
+  "https://https://notifier.elyxxa.com/auth/callback",
+  "https://https://notifier.elyxxa.com/auth/shopify/callback",
+  "https://https://notifier.elyxxa.com/api/auth/callback"
 ]
 
 [pos]
