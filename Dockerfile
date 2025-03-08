@@ -5,6 +5,10 @@ EXPOSE 3000
 
 WORKDIR /app
 
+# Create data directory for SQLite
+RUN mkdir -p /data
+RUN chown -R node:node /data
+
 ENV NODE_ENV=production
 
 COPY package.json package-lock.json* ./

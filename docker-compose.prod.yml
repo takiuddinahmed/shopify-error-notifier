@@ -17,6 +17,8 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-certificates:/letsencrypt"
     restart: unless-stopped
+    networks:
+      - elyxxa-network
 
   app:
     build:
@@ -27,7 +29,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - ./prisma/dev.sqlite:/app/prisma/dev.sqlite
+      - sqlite-data:/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`notifier.elyxxa.com`)"
@@ -35,6 +37,8 @@ services:
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=3000"
     restart: unless-stopped
+    networks:
+      - elyxxa-network
 
   # Add Redis for caching and session management if needed
   redis:
@@ -42,7 +46,15 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    networks:
+      - elyxxa-network
 
 volumes:
   redis_data:
   traefik-certificates:
+  sqlite-data:
+
+networks:
+  elyxxa-network:
+    driver: bridge
+    external: true
