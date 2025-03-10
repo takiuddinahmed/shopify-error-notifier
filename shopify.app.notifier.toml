@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "742b948298a33069d6eb11d1c7233982"
-application_url = "https://notifier.elyxxa.com"
+client_id = "1da8658291502513545729453bcafcc8"
+application_url = "https://urge-gone-genetics-receptors.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
@@ -9,20 +9,19 @@ handle = "notifier-26"
 [build]
 automatically_update_urls_on_dev = true
 include_config_on_deploy = true
-dev_store_url = "notifier-app-test-store.myshopify.com"
 
 [webhooks]
 api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_orders,read_products,write_products"
+scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://https://notifier.elyxxa.com/auth/callback",
-  "https://https://notifier.elyxxa.com/auth/shopify/callback",
-  "https://https://notifier.elyxxa.com/api/auth/callback"
+  "https://urge-gone-genetics-receptors.trycloudflare.com/auth/callback",
+  "https://urge-gone-genetics-receptors.trycloudflare.com/auth/shopify/callback",
+  "https://urge-gone-genetics-receptors.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
