@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "1da8658291502513545729453bcafcc8"
-application_url = "https://urge-gone-genetics-receptors.trycloudflare.com"
+application_url = "https://configuration-malpractice-flu-safe.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
@@ -19,9 +19,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://urge-gone-genetics-receptors.trycloudflare.com/auth/callback",
-  "https://urge-gone-genetics-receptors.trycloudflare.com/auth/shopify/callback",
-  "https://urge-gone-genetics-receptors.trycloudflare.com/api/auth/callback"
+  "https://configuration-malpractice-flu-safe.trycloudflare.com/auth/callback",
+  "https://configuration-malpractice-flu-safe.trycloudflare.com/auth/shopify/callback",
+  "https://configuration-malpractice-flu-safe.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
