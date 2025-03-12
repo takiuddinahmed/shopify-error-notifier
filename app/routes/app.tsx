@@ -29,6 +29,7 @@ export default function App() {
           Alert Message Receiver
         </Link>
         <Link to="/app/all-alert-message">All Alert Messages</Link>
+        <Link to="/app/all-alert">All Alert</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
