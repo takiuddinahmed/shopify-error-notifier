@@ -21,6 +21,9 @@ RUN npm remove @shopify/cli
 
 COPY . .
 
-RUN npm run build
+RUN rm -rf node_modules && \
+    npm install && \
+    npx prisma generate && \
+    npm run build
 
 CMD ["npm", "run", "docker-start"]
