@@ -13,10 +13,10 @@ import {
   Frame,
   ButtonGroup,
 } from "@shopify/polaris";
-// import { AlertType, type AlertMessage } from "@prisma/client";
 import striptags from "striptags";
 import DOMPurify from "isomorphic-dompurify";
-import { AlertMessage, AlertType, AlertTypes } from "app/types/allAlerts";
+import type { AlertMessage, AlertType } from "app/types/allAlerts";
+import { AlertTypes } from "app/types/allAlerts";
 
 interface AlertMessagesListProps {
   alertMessages: AlertMessage[];

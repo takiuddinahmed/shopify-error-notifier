@@ -8,6 +8,7 @@ import {
   type AlertTemplateData,
 } from "app/services/alert-template.server";
 import logger from "app/utils/logger";
+import { AlertTypes } from "app/types/allAlerts";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   logger.debug("Webhook route triggered", { method: request.method });
@@ -142,7 +143,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
         await alertService.handleSendAlert(
           shopId,
-          AlertType.CHECK_OUT,
+          AlertTypes.CHECK_OUT,
           message,
         );
         logger.info("Order paid alert processed", {
@@ -171,7 +172,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           templateData,
         );
 
-        await alertService.handleSendAlert(shopId, AlertType.SIGN_UP, message);
+        await alertService.handleSendAlert(shopId, AlertTypes.SIGN_UP, message);
         logger.info("Customer created alert processed", {
           shopId,
           customerId: customer?.id,
