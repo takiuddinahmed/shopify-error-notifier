@@ -13,9 +13,10 @@ import {
   Frame,
   ButtonGroup,
 } from "@shopify/polaris";
-import { AlertType, type AlertMessage } from "@prisma/client";
+// import { AlertType, type AlertMessage } from "@prisma/client";
 import striptags from "striptags";
 import DOMPurify from "isomorphic-dompurify";
+import { AlertMessage, AlertType, AlertTypes } from "app/types/allAlerts";
 
 interface AlertMessagesListProps {
   alertMessages: AlertMessage[];
@@ -44,7 +45,7 @@ export function AlertMessagesList({
   const fetcher = useFetcher();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedAlertType, setSelectedAlertType] = useState<AlertType>(
-    AlertType.PRODUCTS_CREATE,
+    AlertTypes.PRODUCTS_CREATE,
   );
   const [message, setMessage] = useState("");
   const [viewMessageModalActive, setViewMessageModalActive] = useState(false);
@@ -90,7 +91,7 @@ export function AlertMessagesList({
     onModalChange(false);
   }, [message, selectedAlertType, fetcher, onModalChange]);
 
-  const alertTypes = Object.values(AlertType).map((type) => ({
+  const alertTypes = Object.values(AlertTypes).map((type) => ({
     label: type.replace(/_/g, " "),
     value: type,
   }));
