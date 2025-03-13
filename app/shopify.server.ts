@@ -46,7 +46,7 @@ const shopify = shopifyApp({
     },
     APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhook/app.uninstalled",
+      callbackUrl: "/webhooks/app.uninstalled",
     },
     APP_SUBSCRIPTIONS_UPDATE: {
       deliveryMethod: DeliveryMethod.Http,

@@ -36,6 +36,10 @@ services:
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=3000"
+        # Add this to ensure webhook endpoint is accessible
+      - "traefik.http.middlewares.app-stripprefix.stripprefix.prefixes=/webhooks"
+      - "traefik.http.routers.app-webhooks.rule=Host(`notifier.elyxxa.com`) && PathPrefix(`/webhooks`)"
+      - "traefik.http.routers.app-webhooks.middlewares=app-stripprefix"
     restart: unless-stopped
     networks:
       - elyxxa-network
