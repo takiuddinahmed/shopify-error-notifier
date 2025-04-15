@@ -180,34 +180,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         break;
       }
 
-      case "SYSTEM_ISSUE": {
-        const error = payload;
-        logger.warn("Processing SYSTEM_ISSUE webhook", {
-          shopId,
-          errorType: error?.type,
-        });
+      // case "SYSTEM_ISSUE": {
+      //   const error = payload;
+      //   logger.warn("Processing SYSTEM_ISSUE webhook", {
+      //     shopId,
+      //     errorType: error?.type,
+      //   });
 
-        if (error?.message) {
-          templateData.errorMessage = error.message;
-        }
+      //   if (error?.message) {
+      //     templateData.errorMessage = error.message;
+      //   }
 
-        const message = templateService.getTemplateForAlertType(
-          AlertType.SYSTEM_ISSUE,
-          templateData,
-        );
+      //   const message = templateService.getTemplateForAlertType(
+      //     AlertType.SYSTEM_ISSUE,
+      //     templateData,
+      //   );
 
-        await alertService.handleSendAlert(
-          shopId,
-          AlertType.SYSTEM_ISSUE,
-          message,
-        );
-        logger.error("System issue alert processed", {
-          shopId,
-          errorMessage: error?.message,
-          messageLength: message.length,
-        });
-        break;
-      }
+      //   await alertService.handleSendAlert(
+      //     shopId,
+      //     AlertType.SYSTEM_ISSUE,
+      //     message,
+      //   );
+      //   logger.error("System issue alert processed", {
+      //     shopId,
+      //     errorMessage: error?.message,
+      //     messageLength: message.length,
+      //   });
+      //   break;
+      // }
 
       default:
         logger.warn("Unhandled webhook topic received", { topic, shopId });

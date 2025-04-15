@@ -7,6 +7,7 @@ import {
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import logger from "./utils/logger";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -32,6 +33,8 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks",
     },
+    // These webhooks require customer data approval in the Shopify Partners dashboard
+    // Visit: https://partners.shopify.com/[your-partner-id]/apps/[your-app-id]/customer_data
     ORDERS_PAID: {
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks",
@@ -40,17 +43,18 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks",
     },
-    SYSTEM_ISSUE: {
-      deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks",
-    },
+    // SYSTEM_ISSUE webhook is still commented out
+    // SYSTEM_ISSUE: {
+    //   deliveryMethod: DeliveryMethod.Http,
+    //   callbackUrl: "/webhooks",
+    // },
     APP_UNINSTALLED: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhook/app.uninstalled",
+      callbackUrl: "/webhooks/app_uninstalled",
     },
     APP_SUBSCRIPTIONS_UPDATE: {
       deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/webhooks/app.scopes_update",
+      callbackUrl: "/webhooks/app_scopes_update",
     },
   },
 
@@ -58,9 +62,30 @@ const shopify = shopifyApp({
     afterAuth: async ({ session }) => {
       try {
         await shopify.registerWebhooks({ session });
-        console.log("Successfully registered webhooks");
+        logger.info("Successfully registered all webhooks");
       } catch (error) {
-        console.error("Failed to register webhooks:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        logger.error("Failed to register webhooks:", errorMessage);
+
+        // Check if it's a customer data permission error
+        if (
+          errorMessage.includes("customer data") ||
+          errorMessage.includes("not approved")
+        ) {
+          logger.error(
+            "Customer data error detected: This app is not approved to subscribe to webhooks containing protected customer data.",
+          );
+          logger.error(
+            "Visit your Shopify Partners dashboard to request access to customer data.",
+          );
+          logger.error(
+            "In the meantime, you can use the app with limited functionality.",
+          );
+          logger.error(
+            "The webhooks for product-related events will still work.",
+          );
+        }
       }
     },
   },

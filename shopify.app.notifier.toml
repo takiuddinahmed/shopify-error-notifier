@@ -1,27 +1,27 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "8f615e1b5eed795653ba2c832c3a528c"
-application_url = "https://industry-goes-translate-prerequisite.trycloudflare.com"
+client_id = "fc199f6a72533fd8decfbc423ae3448a"
+application_url = "https://climate-mw-era-pty.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
 
+[build]
+include_config_on_deploy = true
+
 [webhooks]
-api_version = "2025-01"
+api_version = "2025-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_all_orders,read_orders,write_orders,read_products,write_products,read_customers,write_customers"
+scopes = "read_customers,read_orders,read_products,write_products"
 
 [auth]
 redirect_urls = [
-  "https://industry-goes-translate-prerequisite.trycloudflare.com/auth/callback",
-  "https://industry-goes-translate-prerequisite.trycloudflare.com/auth/shopify/callback",
-  "https://industry-goes-translate-prerequisite.trycloudflare.com/api/auth/callback"
+  "https://climate-mw-era-pty.trycloudflare.com/auth/callback",
+  "https://climate-mw-era-pty.trycloudflare.com/auth/shopify/callback",
+  "https://climate-mw-era-pty.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
 embedded = false
-
-[build]
-automatically_update_urls_on_dev = true

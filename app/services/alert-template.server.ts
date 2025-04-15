@@ -70,15 +70,15 @@ export class AlertTemplateService {
           `A new order has been placed${data.shopName ? ` at "${data.shopName}"` : ""}.`,
         );
 
-      case "SYSTEM_ISSUE":
-        return baseMessage(
-          "System Issue Detected",
-          `A system issue has been detected${data.shopName ? ` for "${data.shopName}"` : ""}.${
-            data.errorMessage
-              ? `\n\n<b>Error details:</b>\n${data.errorMessage}`
-              : ""
-          }`,
-        );
+      // case "SYSTEM_ISSUE":
+      //   return baseMessage(
+      //     "System Issue Detected",
+      //     `A system issue has been detected${data.shopName ? ` for "${data.shopName}"` : ""}.${
+      //       data.errorMessage
+      //         ? `\n\n<b>Error details:</b>\n${data.errorMessage}`
+      //         : ""
+      //     }`,
+      //   );
 
       default:
         return baseMessage(
