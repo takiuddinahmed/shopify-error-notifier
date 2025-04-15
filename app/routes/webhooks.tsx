@@ -288,11 +288,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
 
         const message = templateService.getTemplateForAlertType(
-          AlertType.SIGN_UP,
+          "CUSTOMERS_CREATE" as AlertType,
           templateData,
         );
 
-        await alertService.handleSendAlert(shopId, AlertType.SIGN_UP, message);
+        await alertService.handleSendAlert(
+          shopId,
+          "CUSTOMERS_CREATE" as AlertType,
+          message,
+        );
         logger.info("Customer created alert processed", {
           shopId,
           customerId: customer?.id,
@@ -315,11 +319,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
 
         const message = templateService.getTemplateForAlertType(
-          AlertType.SIGN_IN,
+          "CUSTOMERS_UPDATE" as AlertType,
           templateData,
         );
 
-        await alertService.handleSendAlert(shopId, AlertType.SIGN_IN, message);
+        await alertService.handleSendAlert(
+          shopId,
+          "CUSTOMERS_UPDATE" as AlertType,
+          message,
+        );
         logger.info("Customer updated alert processed", {
           shopId,
           customerId: customer?.id,

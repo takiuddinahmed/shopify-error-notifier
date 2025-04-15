@@ -7,12 +7,40 @@ import logger from "app/utils/logger";
 
 interface AlertConfiguration {
   shopId: string;
+  // Product related
   productCreate: boolean;
   productUpdate: boolean;
   productDelete: boolean;
-  signup: boolean;
-  signin: boolean;
+
+  // Customer related
+  customersCreate: boolean;
+  customersUpdate: boolean;
+  customersDelete: boolean;
+  customersRedact: boolean;
+
+  // Order related
   checkout: boolean;
+  ordersUpdated: boolean;
+  ordersCancelled: boolean;
+  ordersFulfilled: boolean;
+
+  // Checkout related
+  checkoutsCreate: boolean;
+  checkoutsUpdate: boolean;
+
+  // Inventory related
+  inventoryUpdate: boolean;
+
+  // Theme related
+  themesCreate: boolean;
+  themesUpdate: boolean;
+  themesDelete: boolean;
+  themesPublish: boolean;
+
+  // Shop related
+  shopUpdate: boolean;
+
+  // System related
   systemIssue: boolean;
 }
 
@@ -53,17 +81,40 @@ export class AlertConfigurationService {
     const { alertConfig } = await this.getShopConfiguration(shopId);
     if (!alertConfig) return false;
 
-    const configMap: Record<AlertType, keyof AlertConfiguration> = {
+    const configMap: Record<string, keyof AlertConfiguration> = {
       PRODUCTS_CREATE: "productCreate",
       PRODUCTS_UPDATE: "productUpdate",
       PRODUCTS_DELETE: "productDelete",
-      SIGN_IN: "signin",
-      SIGN_UP: "signup",
+      SIGN_IN: "customersUpdate",
+      SIGN_UP: "customersCreate",
+      CUSTOMERS_CREATE: "customersCreate",
+      CUSTOMERS_UPDATE: "customersUpdate",
+      CUSTOMERS_DELETE: "customersDelete",
+      CUSTOMERS_REDACT: "customersRedact",
       CHECK_OUT: "checkout",
+      ORDERS_UPDATED: "ordersUpdated",
+      ORDERS_CANCELLED: "ordersCancelled",
+      ORDERS_FULFILLED: "ordersFulfilled",
+      CHECKOUTS_CREATE: "checkoutsCreate",
+      CHECKOUTS_UPDATE: "checkoutsUpdate",
+      INVENTORY_LEVELS_UPDATE: "inventoryUpdate",
+      THEMES_CREATE: "themesCreate",
+      THEMES_UPDATE: "themesUpdate",
+      THEMES_DELETE: "themesDelete",
+      THEMES_PUBLISH: "themesPublish",
+      SHOP_UPDATE: "shopUpdate",
       SYSTEM_ISSUE: "systemIssue",
     };
 
-    return (alertConfig[configMap[alertType]] as boolean) ?? false;
+    const configProperty = configMap[alertType];
+    if (!configProperty) {
+      logger.warn(`No configuration mapping for alert type: ${alertType}`);
+      return false;
+    }
+
+    // Use type assertion here to tell TypeScript this object has all the needed properties
+    const typedConfig = alertConfig as unknown as AlertConfiguration;
+    return Boolean(typedConfig[configProperty]) ?? false;
   }
 
   async getReceiverConfiguration(

@@ -28,13 +28,42 @@ model Session {
 model Configuration {
   id      String   @id @default(cuid())
   shopId     String  @unique
+  // Product related
   productCreate Boolean @default(false)
   productUpdate Boolean @default(false)
   productDelete Boolean @default(false)
-  signup      Boolean @default(false)
-  signin      Boolean @default(false)
+  
+  // Customer related
+  customersCreate      Boolean @default(false)
+  customersUpdate      Boolean @default(false)
+  customersDelete Boolean @default(false)
+  customersRedact Boolean @default(false)
+  
+  // Order related
   checkout    Boolean @default(false)
+  ordersUpdated Boolean @default(false)
+  ordersCancelled Boolean @default(false)
+  ordersFulfilled Boolean @default(false)
+  
+  // Checkout related
+  checkoutsCreate Boolean @default(false)
+  checkoutsUpdate Boolean @default(false)
+  
+  // Inventory related
+  inventoryUpdate Boolean @default(false)
+  
+  // Theme related
+  themesCreate Boolean @default(false)
+  themesUpdate Boolean @default(false)
+  themesDelete Boolean @default(false)
+  themesPublish Boolean @default(false)
+  
+  // Shop related
+  shopUpdate Boolean @default(false)
+  
+  // System related
   systemIssue Boolean @default(false)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -56,8 +85,8 @@ enum AlertType {
   PRODUCTS_DELETE
   
   // Customer related
-  SIGN_IN
-  SIGN_UP
+  CUSTOMERS_CREATE
+  CUSTOMERS_UPDATE
   CUSTOMERS_DELETE
   CUSTOMERS_REDACT
   

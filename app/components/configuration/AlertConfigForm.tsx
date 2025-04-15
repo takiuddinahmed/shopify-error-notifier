@@ -12,32 +12,89 @@ import {
 
 interface ConfigurationType {
   shopId: string;
+  // Product related
   productCreate: boolean;
   productUpdate: boolean;
   productDelete: boolean;
+
+  // Customer related
   signup: boolean;
   signin: boolean;
+  customersDelete: boolean;
+  customersRedact: boolean;
+
+  // Order related
   checkout: boolean;
+  ordersUpdated: boolean;
+  ordersCancelled: boolean;
+  ordersFulfilled: boolean;
+
+  // Checkout related
+  checkoutsCreate: boolean;
+  checkoutsUpdate: boolean;
+
+  // Inventory related
+  inventoryUpdate: boolean;
+
+  // Theme related
+  themesCreate: boolean;
+  themesUpdate: boolean;
+  themesDelete: boolean;
+  themesPublish: boolean;
+
+  // Shop related
+  shopUpdate: boolean;
+
+  // System related
   systemIssue: boolean;
 }
 
 // Define props type for the component
 interface AlertConfigFormProps {
-  initialConfiguration: ConfigurationType | null;
+  initialConfiguration: Partial<ConfigurationType> | null;
 }
 
 interface AlertOption {
   id: keyof SelectedOptions;
   label: string;
+  category: string;
 }
 
 interface SelectedOptions {
+  // Product related
   product_create: boolean;
   product_update: boolean;
   product_delete: boolean;
+
+  // Customer related
   signup: boolean;
   signin: boolean;
+  customers_delete: boolean;
+  customers_redact: boolean;
+
+  // Order related
   checkout: boolean;
+  orders_updated: boolean;
+  orders_cancelled: boolean;
+  orders_fulfilled: boolean;
+
+  // Checkout related
+  checkouts_create: boolean;
+  checkouts_update: boolean;
+
+  // Inventory related
+  inventory_update: boolean;
+
+  // Theme related
+  themes_create: boolean;
+  themes_update: boolean;
+  themes_delete: boolean;
+  themes_publish: boolean;
+
+  // Shop related
+  shop_update: boolean;
+
+  // System related
   system_issue: boolean;
 }
 
@@ -48,24 +105,98 @@ export function AlertConfigForm({
 
   const notificationOptions = useMemo<AlertOption[]>(
     () => [
-      { id: "product_create", label: "Product Creation" },
-      { id: "product_update", label: "Product Update" },
-      { id: "product_delete", label: "Product Deletion" },
-      { id: "signup", label: "New User Signup" },
-      { id: "signin", label: "User Sign In" },
-      { id: "checkout", label: "Checkout Completed" },
-      { id: "system_issue", label: "System Issues" },
+      // Product related
+      { id: "product_create", label: "Product Creation", category: "Products" },
+      { id: "product_update", label: "Product Update", category: "Products" },
+      { id: "product_delete", label: "Product Deletion", category: "Products" },
+      {
+        id: "inventory_update",
+        label: "Inventory Update",
+        category: "Products",
+      },
+
+      // Customer related
+      { id: "signup", label: "New User Registration", category: "Customers" },
+      { id: "signin", label: "User Sign In", category: "Customers" },
+      {
+        id: "customers_delete",
+        label: "Customer Deletion",
+        category: "Customers",
+      },
+      {
+        id: "customers_redact",
+        label: "Customer Data Redaction",
+        category: "Customers",
+      },
+
+      // Order related
+      { id: "checkout", label: "Order Completed", category: "Orders" },
+      { id: "orders_updated", label: "Order Updated", category: "Orders" },
+      { id: "orders_cancelled", label: "Order Cancelled", category: "Orders" },
+      { id: "orders_fulfilled", label: "Order Fulfilled", category: "Orders" },
+
+      // Checkout related
+      {
+        id: "checkouts_create",
+        label: "Checkout Started",
+        category: "Checkout",
+      },
+      {
+        id: "checkouts_update",
+        label: "Checkout Updated",
+        category: "Checkout",
+      },
+
+      // Theme related
+      { id: "themes_create", label: "Theme Created", category: "Themes" },
+      { id: "themes_update", label: "Theme Updated", category: "Themes" },
+      { id: "themes_delete", label: "Theme Deleted", category: "Themes" },
+      { id: "themes_publish", label: "Theme Published", category: "Themes" },
+
+      // Shop related
+      { id: "shop_update", label: "Shop Updated", category: "Shop" },
+
+      // System related
+      { id: "system_issue", label: "System Issues", category: "System" },
     ],
     [],
   );
 
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({
+    // Product related
     product_create: initialConfiguration?.productCreate ?? false,
     product_update: initialConfiguration?.productUpdate ?? false,
     product_delete: initialConfiguration?.productDelete ?? false,
+
+    // Customer related
     signup: initialConfiguration?.signup ?? false,
     signin: initialConfiguration?.signin ?? false,
+    customers_delete: initialConfiguration?.customersDelete ?? false,
+    customers_redact: initialConfiguration?.customersRedact ?? false,
+
+    // Order related
     checkout: initialConfiguration?.checkout ?? false,
+    orders_updated: initialConfiguration?.ordersUpdated ?? false,
+    orders_cancelled: initialConfiguration?.ordersCancelled ?? false,
+    orders_fulfilled: initialConfiguration?.ordersFulfilled ?? false,
+
+    // Checkout related
+    checkouts_create: initialConfiguration?.checkoutsCreate ?? false,
+    checkouts_update: initialConfiguration?.checkoutsUpdate ?? false,
+
+    // Inventory related
+    inventory_update: initialConfiguration?.inventoryUpdate ?? false,
+
+    // Theme related
+    themes_create: initialConfiguration?.themesCreate ?? false,
+    themes_update: initialConfiguration?.themesUpdate ?? false,
+    themes_delete: initialConfiguration?.themesDelete ?? false,
+    themes_publish: initialConfiguration?.themesPublish ?? false,
+
+    // Shop related
+    shop_update: initialConfiguration?.shopUpdate ?? false,
+
+    // System related
     system_issue: initialConfiguration?.systemIssue ?? false,
   });
 
@@ -108,6 +239,20 @@ export function AlertConfigForm({
     (value) => !value,
   );
 
+  // Group notification options by category
+  const groupedOptions = useMemo(() => {
+    const grouped: Record<string, AlertOption[]> = {};
+
+    notificationOptions.forEach((option) => {
+      if (!grouped[option.category]) {
+        grouped[option.category] = [];
+      }
+      grouped[option.category].push(option);
+    });
+
+    return grouped;
+  }, [notificationOptions]);
+
   return (
     <BlockStack gap="300">
       <Card>
@@ -141,14 +286,23 @@ export function AlertConfigForm({
           </div>
           <Divider />
           <fetcher.Form method="post">
-            <BlockStack gap="200">
-              {notificationOptions.map(({ id, label }) => (
-                <Checkbox
-                  key={id}
-                  label={label}
-                  checked={selectedOptions[id]}
-                  onChange={handleChange(id)}
-                />
+            <BlockStack gap="600">
+              {Object.entries(groupedOptions).map(([category, options]) => (
+                <BlockStack key={category} gap="200">
+                  <Text as="h3" variant="headingMd">
+                    {category}
+                  </Text>
+                  <BlockStack gap="200">
+                    {options.map(({ id, label }) => (
+                      <Checkbox
+                        key={id}
+                        label={label}
+                        checked={selectedOptions[id]}
+                        onChange={handleChange(id)}
+                      />
+                    ))}
+                  </BlockStack>
+                </BlockStack>
               ))}
             </BlockStack>
           </fetcher.Form>
@@ -159,6 +313,7 @@ export function AlertConfigForm({
         <Button
           onClick={handleSaveConfiguration}
           loading={fetcher.state === "submitting"}
+          variant="primary"
         >
           Save Settings
         </Button>
