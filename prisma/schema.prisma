@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -51,12 +50,40 @@ model ReceiverConfiguration {
 }
 
 enum AlertType {
+  // Product related
   PRODUCTS_CREATE
   PRODUCTS_UPDATE
   PRODUCTS_DELETE
+  
+  // Customer related
   SIGN_IN
   SIGN_UP
+  CUSTOMERS_DELETE
+  CUSTOMERS_REDACT
+  
+  // Order related
   CHECK_OUT
+  ORDERS_FULFILLED
+  ORDERS_CANCELLED
+  ORDERS_UPDATED
+  
+  // Checkout related
+  CHECKOUTS_CREATE
+  CHECKOUTS_UPDATE
+  
+  // Inventory related
+  INVENTORY_LEVELS_UPDATE
+  
+  // Theme related
+  THEMES_CREATE
+  THEMES_UPDATE
+  THEMES_DELETE
+  THEMES_PUBLISH
+  
+  // Shop related
+  SHOP_UPDATE
+  
+  // System related
   SYSTEM_ISSUE
 }
 
