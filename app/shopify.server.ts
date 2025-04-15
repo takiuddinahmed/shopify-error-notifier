@@ -4,6 +4,7 @@ import {
   AppDistribution,
   DeliveryMethod,
   shopifyApp,
+  Session,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
@@ -61,12 +62,25 @@ const shopify = shopifyApp({
   hooks: {
     afterAuth: async ({ session }) => {
       try {
+        logger.info("Starting webhook registration for session", {
+          shop: session?.shop,
+          scopes: session?.scope,
+        });
+
         await shopify.registerWebhooks({ session });
-        logger.info("Successfully registered all webhooks");
+
+        logger.info("Successfully registered all webhooks", {
+          shop: session?.shop,
+          sessionId: session?.id,
+        });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        logger.error("Failed to register webhooks:", errorMessage);
+        logger.error("Failed to register webhooks:", errorMessage, {
+          shop: session?.shop,
+          sessionId: session?.id,
+          errorDetails: error instanceof Error ? error.stack : "No stack trace",
+        });
 
         // Check if it's a customer data permission error
         if (
@@ -105,5 +119,22 @@ export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;
 export const authenticate = shopify.authenticate;
 export const unauthenticated = shopify.unauthenticated;
 export const login = shopify.login;
-export const registerWebhooks = shopify.registerWebhooks;
+export const registerWebhooks = async function (session: Session) {
+  try {
+    logger.info("Manual webhook registration attempt", {
+      shop: session?.shop,
+    });
+    const result = await shopify.registerWebhooks({ session });
+    logger.info("Manual webhook registration successful", {
+      shop: session?.shop,
+    });
+    return result;
+  } catch (error) {
+    logger.error("Manual webhook registration failed", {
+      shop: session?.shop,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+};
 export const sessionStorage = shopify.sessionStorage;

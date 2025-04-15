@@ -10,20 +10,26 @@ services:
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=info@elyxxa.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--api=true"
+      - "--api.dashboard=true"
     ports:
-      - "80:80"
-      - "443:443"
+      - "9080:80"
+      - "9443:443"
+      - "9090:8080" # Traefik Dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-certificates:/letsencrypt"
     restart: unless-stopped
+    networks:
+      - app-network
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
+      - REMIX_DEV_ORIGIN=http://localhost:9080
     volumes:
       - .:/app
       - /app/node_modules
@@ -31,11 +37,15 @@ services:
       - ./build:/app/build
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`notifier.elyxxa.com`)"
+      - "traefik.http.routers.app.rule=Host(`localhost`) || Host(`notifier.elyxxa.com`)"
+      - "traefik.http.routers.app-insecure.rule=Host(`localhost`) || Host(`notifier.elyxxa.com`)"
+      - "traefik.http.routers.app-insecure.entrypoints=web"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=3000"
     restart: unless-stopped
+    networks:
+      - app-network
 
   # Add Redis for caching and session management if needed
   redis:
@@ -43,7 +53,13 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   redis_data:
   traefik-certificates:
+
+networks:
+  app-network:
+    driver: bridge

@@ -10,9 +10,13 @@ services:
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=info@elyxxa.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--api=true"
+      - "--api.dashboard=true"
     ports:
       - "80:80"
       - "443:443"
+      # Comment out dashboard port for production or restrict access
+      # - "8080:8080" # Traefik Dashboard - uncomment for debugging if needed
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "traefik-certificates:/letsencrypt"
@@ -26,6 +30,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
+      # Force webhook registration at startup
+      - FORCE_REGISTER_WEBHOOKS=1
+      # Make sure these URLs match your production domain
+      - APP_URL=https://notifier.elyxxa.com
+      - SHOPIFY_APP_URL=https://notifier.elyxxa.com
     volumes:
       - .:/app
       - /app/node_modules
@@ -33,6 +42,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(`notifier.elyxxa.com`)"
+      # HTTP route for automatic HTTPS redirects
+      - "traefik.http.routers.app-insecure.rule=Host(`notifier.elyxxa.com`)"
+      - "traefik.http.routers.app-insecure.entrypoints=web"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.app-insecure.middlewares=https-redirect"
+      # HTTPS route
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls.certresolver=myresolver"
       - "traefik.http.services.app.loadbalancer.server.port=3000"
