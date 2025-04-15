@@ -63,48 +63,54 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   try {
     const configService = new ConfigurationService(shopId);
-    const configData =
-      (await configService.getConfiguration()) as Partial<ConfigurationType>;
+    const configData = await configService.getConfiguration();
+    console.log("Raw config data from DB:", configData);
 
     // Transform data to ensure all expected fields are present
-    const configuration: ConfigurationType | null = configData
+    const configuration = configData
       ? {
-          shopId: configData.shopId ?? shopId,
+          shopId: configData.shopId,
           // Product related
-          productCreate: configData.productCreate ?? false,
-          productUpdate: configData.productUpdate ?? false,
-          productDelete: configData.productDelete ?? false,
+          productCreate: (configData as any).productCreate ?? false,
+          productUpdate: (configData as any).productUpdate ?? false,
+          productDelete: (configData as any).productDelete ?? false,
 
           // Customer related
-          signup: configData.signup ?? false,
-          signin: configData.signin ?? false,
-          customersDelete: configData.customersDelete ?? false,
-          customersRedact: configData.customersRedact ?? false,
+          customersCreate:
+            (configData as any).customersCreate ??
+            (configData as any).signup ??
+            false,
+          customersUpdate:
+            (configData as any).customersUpdate ??
+            (configData as any).signin ??
+            false,
+          customersDelete: (configData as any).customersDelete ?? false,
+          customersRedact: (configData as any).customersRedact ?? false,
 
           // Order related
-          checkout: configData.checkout ?? false,
-          ordersUpdated: configData.ordersUpdated ?? false,
-          ordersCancelled: configData.ordersCancelled ?? false,
-          ordersFulfilled: configData.ordersFulfilled ?? false,
+          checkout: (configData as any).checkout ?? false,
+          ordersUpdated: (configData as any).ordersUpdated ?? false,
+          ordersCancelled: (configData as any).ordersCancelled ?? false,
+          ordersFulfilled: (configData as any).ordersFulfilled ?? false,
 
           // Checkout related
-          checkoutsCreate: configData.checkoutsCreate ?? false,
-          checkoutsUpdate: configData.checkoutsUpdate ?? false,
+          checkoutsCreate: (configData as any).checkoutsCreate ?? false,
+          checkoutsUpdate: (configData as any).checkoutsUpdate ?? false,
 
           // Inventory related
-          inventoryUpdate: configData.inventoryUpdate ?? false,
+          inventoryUpdate: (configData as any).inventoryUpdate ?? false,
 
           // Theme related
-          themesCreate: configData.themesCreate ?? false,
-          themesUpdate: configData.themesUpdate ?? false,
-          themesDelete: configData.themesDelete ?? false,
-          themesPublish: configData.themesPublish ?? false,
+          themesCreate: (configData as any).themesCreate ?? false,
+          themesUpdate: (configData as any).themesUpdate ?? false,
+          themesDelete: (configData as any).themesDelete ?? false,
+          themesPublish: (configData as any).themesPublish ?? false,
 
           // Shop related
-          shopUpdate: configData.shopUpdate ?? false,
+          shopUpdate: (configData as any).shopUpdate ?? false,
 
           // System related
-          systemIssue: configData.systemIssue ?? false,
+          systemIssue: (configData as any).systemIssue ?? false,
 
           // Keep other fields
           id: configData.id,
@@ -153,8 +159,8 @@ export async function action({ request }: ActionFunctionArgs) {
       productDelete: data.product_delete === "true",
 
       // Customer related
-      signup: data.signup === "true",
-      signin: data.signin === "true",
+      customersCreate: data.customers_create === "true",
+      customersUpdate: data.customers_update === "true",
       customersDelete: data.customers_delete === "true",
       customersRedact: data.customers_redact === "true",
 
@@ -206,6 +212,17 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Configuration() {
   const { configuration } = useLoaderData<typeof loader>();
+
+  console.log(
+    "Configuration from loader:",
+    JSON.stringify(configuration, null, 2),
+  );
+
+  // Check what properties are actually available
+  if (configuration) {
+    const configKeys = Object.keys(configuration);
+    console.log("Available config keys:", configKeys);
+  }
 
   return (
     <Page title="Configuration">

@@ -8,8 +8,8 @@ interface ConfigurationData {
   productDelete: boolean;
 
   // Customer related
-  signup: boolean;
-  signin: boolean;
+  customersCreate: boolean;
+  customersUpdate: boolean;
   customersDelete: boolean;
   customersRedact: boolean;
 
@@ -47,9 +47,15 @@ export class ConfigurationService {
   }
 
   async getConfiguration() {
-    return prisma.configuration.findUnique({
+    const config = await prisma.configuration.findUnique({
       where: { shopId: this.shopId },
     });
+    console.log("Database configuration raw:", config);
+    console.log(
+      "Database configuration stringified:",
+      JSON.stringify(config, null, 2),
+    );
+    return config;
   }
 
   async upsertConfiguration(configData: Omit<ConfigurationData, "shopId">) {

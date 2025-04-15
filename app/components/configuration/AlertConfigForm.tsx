@@ -10,7 +10,7 @@ import {
   BlockStack,
 } from "@shopify/polaris";
 
-interface ConfigurationType {
+export interface ConfigurationType {
   shopId: string;
   // Product related
   productCreate: boolean;
@@ -18,8 +18,8 @@ interface ConfigurationType {
   productDelete: boolean;
 
   // Customer related
-  signup: boolean;
-  signin: boolean;
+  customersCreate: boolean;
+  customersUpdate: boolean;
   customersDelete: boolean;
   customersRedact: boolean;
 
@@ -67,8 +67,8 @@ interface SelectedOptions {
   product_delete: boolean;
 
   // Customer related
-  signup: boolean;
-  signin: boolean;
+  customers_create: boolean;
+  customers_update: boolean;
   customers_delete: boolean;
   customers_redact: boolean;
 
@@ -102,6 +102,9 @@ export function AlertConfigForm({
   initialConfiguration,
 }: AlertConfigFormProps) {
   const fetcher = useFetcher();
+  console.log("initialConfiguration:", initialConfiguration);
+  console.log("customersCreate value:", initialConfiguration?.customersCreate);
+  console.log("customersUpdate value:", initialConfiguration?.customersUpdate);
 
   const notificationOptions = useMemo<AlertOption[]>(
     () => [
@@ -116,8 +119,16 @@ export function AlertConfigForm({
       },
 
       // Customer related
-      { id: "signup", label: "New User Registration", category: "Customers" },
-      { id: "signin", label: "User Sign In", category: "Customers" },
+      {
+        id: "customers_create",
+        label: "Customer Creation",
+        category: "Customers",
+      },
+      {
+        id: "customers_update",
+        label: "Customer Update",
+        category: "Customers",
+      },
       {
         id: "customers_delete",
         label: "Customer Deletion",
@@ -169,8 +180,14 @@ export function AlertConfigForm({
     product_delete: initialConfiguration?.productDelete ?? false,
 
     // Customer related
-    signup: initialConfiguration?.signup ?? false,
-    signin: initialConfiguration?.signin ?? false,
+    customers_create:
+      initialConfiguration?.customersCreate ??
+      (initialConfiguration as any)?.signup ??
+      false,
+    customers_update:
+      initialConfiguration?.customersUpdate ??
+      (initialConfiguration as any)?.signin ??
+      false,
     customers_delete: initialConfiguration?.customersDelete ?? false,
     customers_redact: initialConfiguration?.customersRedact ?? false,
 
@@ -199,6 +216,8 @@ export function AlertConfigForm({
     // System related
     system_issue: initialConfiguration?.systemIssue ?? false,
   });
+
+  console.log("selectedOptions:", selectedOptions);
 
   const handleChange = useCallback(
     (id: keyof SelectedOptions) => (checked: boolean) => {
@@ -250,6 +269,7 @@ export function AlertConfigForm({
       grouped[option.category].push(option);
     });
 
+    console.log("Grouped options:", grouped);
     return grouped;
   }, [notificationOptions]);
 
@@ -293,14 +313,21 @@ export function AlertConfigForm({
                     {category}
                   </Text>
                   <BlockStack gap="200">
-                    {options.map(({ id, label }) => (
-                      <Checkbox
-                        key={id}
-                        label={label}
-                        checked={selectedOptions[id]}
-                        onChange={handleChange(id)}
-                      />
-                    ))}
+                    {options.map(({ id, label }) => {
+                      console.log(
+                        `Rendering option: ${id}, ${label}, checked: ${selectedOptions[id]}`,
+                      );
+                      return (
+                        <div key={id} style={{ display: "block" }}>
+                          <Checkbox
+                            key={id}
+                            label={label}
+                            checked={selectedOptions[id]}
+                            onChange={handleChange(id)}
+                          />
+                        </div>
+                      );
+                    })}
                   </BlockStack>
                 </BlockStack>
               ))}
