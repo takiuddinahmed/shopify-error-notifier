@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "b5d71c88ca9d7eb8b8f7e073d2d9963d"
-application_url = "https://ultram-bras-influences-ringtone.trycloudflare.com"
+client_id = "723a72a52eab858c799e8f93dac6e37a"
+application_url = "https://hung-emperor-patrick-boston.trycloudflare.com"
 embedded = true
 name = "Notifier"
 handle = "notifier-26"
@@ -14,13 +14,13 @@ api_version = "2025-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_orders,read_products,write_products"
+scopes = "read_customers,write_customers,read_all_orders,read_orders,read_products,write_products,read_themes,write_themes,read_inventory,write_inventory,read_shopify_payments,write_shopify_payments"
 
 [auth]
 redirect_urls = [
-  "https://ultram-bras-influences-ringtone.trycloudflare.com/auth/callback",
-  "https://ultram-bras-influences-ringtone.trycloudflare.com/auth/shopify/callback",
-  "https://ultram-bras-influences-ringtone.trycloudflare.com/api/auth/callback"
+  "https://hung-emperor-patrick-boston.trycloudflare.com/auth/callback",
+  "https://hung-emperor-patrick-boston.trycloudflare.com/auth/shopify/callback",
+  "https://hung-emperor-patrick-boston.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
